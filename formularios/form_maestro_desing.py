@@ -10,6 +10,8 @@ from customtkinter import *
 from tkinter import messagebox
 import openpyxl
 from datetime import datetime
+import random
+import string
 
 
 
@@ -19,13 +21,14 @@ class FormularioMaestroDesing(tk.Tk):
         super().__init__()
         self.logo = util_img.leer_imagen("./imagenes/logo.png",(560,136))
         self.perfil = util_img.leer_imagen("./imagenes/perfil.png",(100,100))
+        self.menu_burger = util_img.leer_imagen("./imagenes/menu-burger.png",(20,20))
         self.config_window()
         self.paneles()
         self.controles_barra_superior()
         self.controles_menu_lateral()
         self.controles_cuerpo()
         self.editando_producto_id = None
-         
+     
     def config_window(self):
         self.title('Punto de Venta')
         self.iconbitmap("./imagenes/logo.ico")
@@ -52,7 +55,12 @@ class FormularioMaestroDesing(tk.Tk):
         pady=10, width=16)
         self.labelTitulo.pack(side=tk.LEFT)
 
-       
+        # Botón del menú lateral
+        self.buttonMenuLateral = CTkButton(self.barra_superior, text='\uf0c9',
+                                           command=self.toggle_panel,fg_color=COLOR_BARRA_SUPERIOR,font=("Arial",20),hover_color=COLOR_BARRA_SUPERIOR)
+        self.buttonMenuLateral.pack(side=tk.LEFT)
+
+
         self.labelTitulo = tk.Label(
             self.barra_superior,text="@bacosoluciones")
         self.labelTitulo.config(
@@ -60,7 +68,7 @@ class FormularioMaestroDesing(tk.Tk):
         self.labelTitulo.pack(side=tk.RIGHT)
 
     def controles_menu_lateral(self):
-        ancho_menu = 20
+        ancho_menu = 24
         alto_menu = 2
         font_awesome = font.Font(family='FontAweson',size=15)
 
@@ -69,18 +77,18 @@ class FormularioMaestroDesing(tk.Tk):
         self.labelPerfil.pack(side=tk.TOP,pady=10)
 
         self.buttonInventario = tk.Button(self.menu_lateral,command=self.Inventario) 
-        self.buttonIngresoVentas = tk.Button(self.menu_lateral) 
+        self.buttonIngresoVentas = tk.Button(self.menu_lateral,command=self.ventas) 
         self.buttonHistorialVentas = tk.Button(self.menu_lateral) 
-        self.buttonProveedores= tk.Button(self.menu_lateral) 
-        self.buttonClientes = tk.Button(self.menu_lateral)
-        self.buttonDatosNegocio = tk.Button(self.menu_lateral)
+       # self.buttonProveedores= tk.Button(self.menu_lateral) 
+        self.buttonClientes = tk.Button(self.menu_lateral,command=self.mostrar_clientes)  
+        self.buttonDatosNegocio = tk.Button(self.menu_lateral,command=self.datos_negocio)
         self.buttonUsuarios = tk.Button(self.menu_lateral)
      
         buttons_info = [
         ("Inventario", "\uf494", self.buttonInventario), 
         ("Ingreso Ventas", "\uf788", self.buttonIngresoVentas), 
         ("Historial Ventas", "\uf07a", self.buttonHistorialVentas), 
-        ("Proveedores", "\ue58d", self.buttonProveedores),
+        #("Proveedores", "\ue58d", self.buttonProveedores),
         ("Clientes", "\uf007", self.buttonClientes),
         ("Datos Negocio", "\uf54e", self.buttonDatosNegocio),
         ("Usuarios", "\ue594", self.buttonUsuarios),
@@ -89,6 +97,14 @@ class FormularioMaestroDesing(tk.Tk):
         for text, icon, button in buttons_info:
             self.configurar_boton_menu(button, text, icon, font_awesome, ancho_menu, alto_menu)
     
+    def toggle_panel(self):
+        # Alternar visibilidad del menú lateral
+        if self.menu_lateral.winfo_ismapped():
+             self.menu_lateral.pack_forget()
+           
+        else:
+            self.menu_lateral.pack(side=tk.LEFT, fill='y')
+
     def bind_hover_events(self,button):
         button.bind("<Enter>", lambda event: self.on_enter(event,button))
         button.bind("<Leave>", lambda event: self.on_leave(event,button))
@@ -111,79 +127,109 @@ class FormularioMaestroDesing(tk.Tk):
         label.place(x=0,y=0,relwidth=1,relheight=1)
     
 
-
-    #funciones para el inventario
+#---------------------funciones para el inventario-------------------------------------------------
     
     def Inventario(self):
+       
+
         # Limpiar cualquier widget existente en el cuerpo principal
         for widget in self.cuerpo_principal.winfo_children():
             widget.destroy()
+          # Definir el estilo general para los botones
+        
+        ESTILO_CTKBOTONES_DATOS_INVENTARIO = {
+            'width': 30,
+            'height': 30,
+            'text_color': 'black',
+            'font': ("OCR A Extended", 12)
+        }
+
+        ESTILO_TITULO_LABEL_DATOS_INVENTARIO = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 15, "bold"),  
+        }
+
+        ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 14),
+               
+        }
+        
+        ALINEACION_FORMULARIO = {
+        'padx': 5,
+        'pady': 5,
+        'sticky': 'w'
+        }
+#Creando la ventana de D
             
         # Crear un formulario para agregar nuevos elementos al inventario
         formulario_inventario = tk.Frame(self.cuerpo_principal, bg=COLOR_CUERPO_PRINCIPAL)
         formulario_inventario.pack(padx=20, pady=20, fill='both', expand=True)
 
         # Etiquetas y campos de entrada para el formulario_inventario
-        CTkLabel(formulario_inventario,text="INGRESO DE PRODUCTOS",font=("Roboto",17)).grid(row=0,column=0,sticky="ns",padx=5,pady=5,columnspan=2)
+        CTkLabel(formulario_inventario,text="INGRESO DE PRODUCTOS",**ESTILO_TITULO_LABEL_DATOS_INVENTARIO).grid(row=0,column=0,sticky="ns",padx=5,pady=5,columnspan=2)
 
         #dentry para id OCULTO
         id_producto_entry = tk.Entry(formulario_inventario,)
         id_producto_entry.grid(row=1, column=1, padx=5, pady=5)
         id_producto_entry.grid_remove()
       
-        CTkLabel(formulario_inventario, text="Nombre:",font=("Roboto",16)).grid(row=2, column=0, sticky='w', padx=5, pady=5)
-        nombre_producto_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        nombre_producto_entry.grid(row=2, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Nombre:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=2, column=0,**ALINEACION_FORMULARIO)
+        nombre_producto_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        nombre_producto_entry.grid(row=2, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Descripción:",font=("Roboto",16)).grid(row=3, column=0, sticky='w', padx=5, pady=5)
-        descripcion_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        descripcion_entry.grid(row=3, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Descripción:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=3, column=0,**ALINEACION_FORMULARIO)
+        descripcion_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        descripcion_entry.grid(row=3, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Precio venta:",font=("Roboto",16)).grid(row=4, column=0, sticky='w', padx=5, pady=5)
-        precio_venta_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        precio_venta_entry.grid(row=4, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Precio venta:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=4, column=0,**ALINEACION_FORMULARIO)
+        precio_venta_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        precio_venta_entry.grid(row=4, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Precio compra:",font=("Roboto",16)).grid(row=5, column=0, sticky='w', padx=5, pady=5)
-        precio_compra_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        precio_compra_entry.grid(row=5, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Precio compra:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=5, column=0,**ALINEACION_FORMULARIO)
+        precio_compra_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        precio_compra_entry.grid(row=5, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Existencias:",font=("Roboto",16)).grid(row=6, column=0, sticky='w', padx=5, pady=5)
-        existencias_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        existencias_entry.grid(row=6, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Existencias:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=6, column=0,**ALINEACION_FORMULARIO)
+        existencias_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        existencias_entry.grid(row=6, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Stock Min:",font=("Roboto",16)).grid(row=7, column=0, sticky='w', padx=5, pady=5)
-        stock_minimo_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        stock_minimo_entry.grid(row=7, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Stock Min:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=7, column=0,**ALINEACION_FORMULARIO)
+        stock_minimo_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        stock_minimo_entry.grid(row=7, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Codigo de barras:",font=("Roboto",16)).grid(row=8, column=0, sticky='w', padx=5, pady=5)
-        codigo_barras_entry = CTkEntry(formulario_inventario,font=("Roboto",16))
-        codigo_barras_entry.grid(row=8, column=1, padx=5, pady=5)
+        CTkLabel(formulario_inventario, text="Codigo de barras:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=8, column=0,**ALINEACION_FORMULARIO)
+        codigo_barras_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        codigo_barras_entry.grid(row=8, column=1,**ALINEACION_FORMULARIO)
 
         # Actualizar la descripción al principio
     
       # Botón para agregar el producto al inventario
-        agregar_button = CTkButton(formulario_inventario, text="\uf055 Agregar Producto", 
+        agregar_button = CTkButton(formulario_inventario, text="\uf055 Agregar\nProducto", 
                                     command=lambda: self.agregar_producto(tree_inventario, nombre_producto_entry, descripcion_entry, 
                                                                         precio_venta_entry, precio_compra_entry, existencias_entry, 
-                                                                        stock_minimo_entry, codigo_barras_entry, id_producto_entry), text_color="black")
+                                                                        stock_minimo_entry, codigo_barras_entry, id_producto_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         agregar_button.grid(row=9, column=1, padx=5, pady=5)
 
         # Botón para limpiar el formulario
     
-        limpiar_formulario_button = CTkButton(formulario_inventario, text="\uf87d Limpiar formulario", text_color="black", command=lambda: self.limpiar_formulario(id_producto_entry,nombre_producto_entry,descripcion_entry,precio_venta_entry,precio_compra_entry,existencias_entry,stock_minimo_entry,codigo_barras_entry))
+        limpiar_formulario_button = CTkButton(formulario_inventario, text="\uf1b8 Limpiar\nformulario", 
+                                              command=lambda: self.limpiar_formulario(id_producto_entry,nombre_producto_entry,descripcion_entry,
+                                                                                      precio_venta_entry,precio_compra_entry,existencias_entry,
+                                                                                      stock_minimo_entry,codigo_barras_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         limpiar_formulario_button.grid(row=9, column=0, padx=5, pady=5)
 
         # Crear y empaquetar el label para la descripción del producto
-        self.descripcion_info_producto = tk.Label(formulario_inventario,font=("Roboto", 16),wraplength=500,background=COLOR_CUERPO_PRINCIPAL,justify="left")
+        self.descripcion_info_producto = tk.Label(formulario_inventario,font = ("OCR A Extended", 13),wraplength=300,background=COLOR_CUERPO_PRINCIPAL,justify="left")
         self.descripcion_info_producto.place(relx=0.5, rely=0.3, anchor='nw')
 
         # Crear y empaquetar el label para la notificación de existencias bajas
-        self.notificacion_existencias_bajas = tk.Label(formulario_inventario,font=("Roboto", 14), fg="red", background=COLOR_CUERPO_PRINCIPAL,wraplength=300)
+        self.notificacion_existencias_bajas = tk.Label(formulario_inventario,font = ("OCR A Extended", 14), fg="red", background=COLOR_CUERPO_PRINCIPAL,wraplength=300)
 
-        self.lbl_buscar = CTkLabel(formulario_inventario,text="Buscar producto:",font=("Roboto",16))
+        self.lbl_buscar = CTkLabel(formulario_inventario,text="Buscar producto:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
         self.lbl_buscar.place(relx=0.60, rely=0.85, anchor='e')
 
-        self.entry_buscar = CTkEntry(formulario_inventario,height=30,width=150,font=("Roboto",16),placeholder_text="\uf002")
+        self.entry_buscar = CTkEntry(formulario_inventario,height=30,width=150,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO,placeholder_text="\uf3eb")
         self.entry_buscar.place(relx=0.80, rely=0.85, anchor='e')
 
         self.entry_buscar.bind("<KeyRelease>", lambda event: self.filtrar_productos(event, tree_inventario, self.entry_buscar))
@@ -198,8 +244,8 @@ class FormularioMaestroDesing(tk.Tk):
 
         # Configurar el estilo
         style = ttk.Style()
-        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Roboto', 10))  # Modify the font of the body
-        style.configure("mystyle.Treeview.Heading", font=('Roboto', 11, 'bold'))  # Modify the font of the headings
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font = ("OCR A Extended", 10))  # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font = ("OCR A Extended", 9,"bold"))  # Modify the font of the headings
         style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])  # Remove the borders
 
         # Crear el TreeView con el estilo configurado y limitar el número máximo de filas
@@ -239,11 +285,7 @@ class FormularioMaestroDesing(tk.Tk):
         productos = cursor.fetchall()
         conn.close()
         
-        for producto in productos:
-            self.agregar_producto_a_treeview(producto, tree_inventario)
-
-        self.actualizar_descripcion(None, tree_inventario)
-
+        
         # Obtener la descripción seleccionada
         descripcion_seleccionada = "Descripción seleccionada"
 
@@ -255,29 +297,40 @@ class FormularioMaestroDesing(tk.Tk):
         buttons_frame.grid(row=0, column=2, sticky="ns")
 
         # Crear los botones de editar y eliminar
-        editar_button = CTkButton(buttons_frame, text="\uf044"" Editar",text_color="black", command=lambda: self.editar_producto(tree_inventario, nombre_producto_entry, descripcion_entry, precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry))
+        editar_button = CTkButton(buttons_frame, text="\uf044"" Editar", 
+                                  command=lambda: self.editar_producto(tree_inventario, nombre_producto_entry, 
+                                                                       descripcion_entry, precio_venta_entry, precio_compra_entry, 
+                                                                       existencias_entry, stock_minimo_entry, codigo_barras_entry, 
+                                                                       id_producto_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         editar_button.pack(side="top", padx=5, pady=5)
 
-        eliminar_button = CTkButton(buttons_frame, text="\uf056"" Eliminar",text_color="black", command=lambda: self.eliminar_producto(tree_inventario))
+        eliminar_button = CTkButton(buttons_frame, text="\uf056"" Eliminar", command=lambda: self.eliminar_producto(tree_inventario)
+                                    ,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         eliminar_button.pack(side="top", padx=5, pady=5)
 
-        cargar_button = CTkButton(buttons_frame, text="\uf093"" Cargar Excel",text_color="black",command=lambda: self.cargar_excel(tree_inventario))
+        cargar_button = CTkButton(buttons_frame, text="\uf093"" Cargar\nExcel",command=lambda: self.cargar_excel(tree_inventario)
+                                  ,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         cargar_button.pack(side="top", padx=5, pady=5)
 
-        descargar_button = CTkButton(buttons_frame, text="\uf019 Respaldo", text_color="black", command=self.descargar_productos_excel)
+        descargar_button = CTkButton(buttons_frame, text="\uf019 Respaldo", command=self.descargar_productos_excel,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         descargar_button.pack(side="top", padx=5, pady=5)
 
         # Verificar si hay existencias mínimas en la lista de productos
         existencias_minimas = any(producto[5] < producto[6] for producto in productos)
 
         # Crear el botón con la opción de habilitarlo o deshabilitarlo según la condición
-        informe_stock_min_button = CTkButton(buttons_frame, text="\uf15b"" Informe Mín. Stock", text_color="black", command=lambda: self.mostrar_informe_min_stock(productos))
+        informe_stock_min_button = CTkButton(buttons_frame, text="\uf15b"" Informe\nStock\nminimo", command=lambda: self.mostrar_informe_min_stock(productos),
+                                             **ESTILO_CTKBOTONES_DATOS_INVENTARIO)
         if existencias_minimas:
             informe_stock_min_button.configure(state="normal")  # Habilitar el botón si hay existencias mínimas
         else:
             informe_stock_min_button.configure(state="disabled")  # Deshabilitar el botón si no hay existencias mínimas
         informe_stock_min_button.pack(side="top", padx=5, pady=5)
 
+        for producto in productos:
+            self.agregar_producto_a_treeview(producto, tree_inventario)
+
+        self.actualizar_descripcion(None, tree_inventario)
 
     def actualizar_descripcion(self, event, tree_inventario):
         try:
@@ -657,51 +710,66 @@ class FormularioMaestroDesing(tk.Tk):
             self.notificacion_existencias_bajas.lift()  # Traer la etiqueta al frente
         else:
             self.notificacion_existencias_bajas.place_forget()  # Ocultar la etiqueta si no hay existencias bajas
-        self.agregar_producto_a_treeview  # No estoy seguro de qué hace esta línea, así que la he mantenido
 
     def mostrar_informe_min_stock(self, productos):
+        # Verificar si la ventana ya está abierta
+        if hasattr(self, "informe_window") and self.informe_window.winfo_exists():
+            self.informe_window.deiconify()  # Enfocar ventana existente si está abierta
+            self.actualizar_informe_min_stock(productos)  # Actualizar contenido
+            return
+        
         # Crear una nueva ventana
-        informe_window = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
-        informe_window.title("INFORME")
-        informe_window.iconbitmap("./imagenes/logo.ico")
-        informe_window.geometry("300x200")
+        self.informe_window = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
+        self.informe_window.title("INFORME")
+        self.informe_window.iconbitmap("./imagenes/logo.ico")
+        self.informe_window.geometry("300x200")
 
         # Crear un Frame para contener el Treeview y el Scrollbar
-        tree_frame = tk.Frame(informe_window)
+        tree_frame = tk.Frame(self.informe_window)
         tree_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
         # Configurar el estilo
         style = ttk.Style()
-        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Roboto', 10))  # Modify the font of the body
-        style.configure("mystyle.Treeview.Heading", font=('Roboto', 11, 'bold'))  # Modify the font of the headings
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font = ("OCR A Extended", 10))  # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font = ("OCR A Extended", 9,"bold"))  # Modify the font of the headings
         style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])  # Remove the borders
 
         # Crear un Treeview en el frame con el estilo configurado
-        informe_treeview = ttk.Treeview(tree_frame, style="mystyle.Treeview")
-        informe_treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.informe_treeview = ttk.Treeview(tree_frame, style="mystyle.Treeview")
+        self.informe_treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Crear un Scrollbar para el Treeview
-        treeview_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=informe_treeview.yview)
+        treeview_scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.informe_treeview.yview)
         treeview_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Configurar el comando de desplazamiento del Treeview
-        informe_treeview.configure(yscrollcommand=treeview_scrollbar.set)
+        self.informe_treeview.configure(yscrollcommand=treeview_scrollbar.set)
 
         # Configurar las columnas del Treeview
-        informe_treeview["columns"] = ("Nombre", "Existencias")
-        informe_treeview.heading("#0", text="ID", anchor="center")  # Oculta la columna de índice
-        informe_treeview.heading("Nombre", text="Nombre")
-        informe_treeview.heading("Existencias", text="Existencias")
+        self.informe_treeview["columns"] = ("Nombre", "Existencias")
+        self.informe_treeview.heading("#0", text="ID", anchor="center")  # Oculta la columna de índice
+        self.informe_treeview.heading("Nombre", text="Nombre")
+        self.informe_treeview.heading("Existencias", text="Existencias")
 
         # Ajustar el ancho de las columnas
-        informe_treeview.column("#0", width=0, stretch=tk.NO)  # Oculta la columna de índice
-        informe_treeview.column("Nombre", width=150, anchor="center")
-        informe_treeview.column("Existencias", width=100, anchor="center")
+        self.informe_treeview.column("#0", width=0, stretch=tk.NO)  # Oculta la columna de índice
+        self.informe_treeview.column("Nombre", width=150, anchor="center")
+        self.informe_treeview.column("Existencias", width=100, anchor="center")
 
         # Obtener y agregar los productos al Treeview con existencias mínimas
         for producto in productos:
             if producto[5] < producto[6]:  # Verificar si las existencias son menores al stock mínimo
-                informe_treeview.insert("", "end", values=(producto[1], producto[5]))
+                self.informe_treeview.insert("", "end", values=(producto[1], producto[5]))
+    
+    def actualizar_informe_min_stock(self, productos):
+        # Limpiar contenido anterior
+        for item in self.informe_treeview.get_children():
+            self.informe_treeview.delete(item)
+
+        # Obtener y agregar los productos al Treeview con existencias mínimas
+        for producto in productos:
+            if producto[5] < producto[6]:  # Verificar si las existencias son menores al stock mínimo
+                self.informe_treeview.insert("", "end", values=(producto[1], producto[5]))
 
     def agregar_producto_a_treeview(self, producto, tree_inventario):
         # Agregar el signo "$" al precio de venta y de compra
@@ -720,7 +788,430 @@ class FormularioMaestroDesing(tk.Tk):
         tree_inventario.insert("", "end", text="", values=(producto[0], producto[1], producto[2], precio_venta, precio_compra, existencias, producto[6], producto[7]), tags=tags)
         
 
+#---------------------FUNCIONES PARA VENTAS--------------------------------
+
+    def ventas(self):
+        # Limpiar cualquier widget existente en el cuerpo principal
+        for widget in self.cuerpo_principal.winfo_children():
+            widget.destroy()
+
+        # Crear el frame para los botones de acceso rápido
+        botones_accesos_rapidos = tk.Frame(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
+        botones_accesos_rapidos.pack(fill='x', padx=10, pady=(10, 0))
+
+        # Crear los botones de acceso rápido
+        boton_nueva_venta = CTkButton(botones_accesos_rapidos, text="NUEVA\nVENTA",width=70,height=70,text_color='black',font=("OCR A Extended",12))
+        boton_nueva_venta.grid(column=0, row=0, padx=10, pady=10)
+
+        boton_ingreso_producto_hurfano = CTkButton(botones_accesos_rapidos, 
+                                            text="INGRESO\nPRODUCTO\nBAJO PEDIDO", 
+                                            width=70, height=70, text_color='black',font=("OCR A Extended",12))
+        boton_ingreso_producto_hurfano.grid(column=1, row=0, padx=10, pady=10)
+
+        
+        opcion_sinfac_confac = CTkOptionMenu(botones_accesos_rapidos, 
+                                values=["Venta sin comprobante", "Venta con comprobante"], 
+                                width=200, 
+                                font=("OCR A Extended", 12),text_color='black')
+        opcion_sinfac_confac.grid(column=2, row=0, padx=10, pady=10)
+
+
+        # Crear el frame para el filtrado de productos
+        filtrado_productos_venta = tk.LabelFrame(self.cuerpo_principal, text="Búsqueda de producto", background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
+        filtrado_productos_venta.pack(fill="x", padx=10, pady=(0, 10))
+
+        # Entry para ingresar el término de búsqueda
+        entry_busqueda_producto = CTkEntry(filtrado_productos_venta, bg_color=COLOR_CUERPO_PRINCIPAL, width=300, 
+                                        placeholder_text="\uf02a Ingrese Cod barras, Nombre o Descripcion",font=("OCR A Extended",14))
+        entry_busqueda_producto.grid(column=0, row=0, padx=(10, 5), pady=10, sticky='ew')
+        # Vincular la función de actualización al evento de modificación del Entry
+        entry_busqueda_producto.bind('<KeyRelease>', lambda event: self.actualizar_filtrado(event, entry_busqueda_producto, treeview, lbl_pro_sel))
+
+        # Crear el estilo para el Treeview
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 10))
+        style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 11, 'bold'))
+        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+
+        # Aplicar el estilo al Treeview
+        treeview = ttk.Treeview(filtrado_productos_venta, columns=('Nombre', 'Descripción', 'Precio','Existencias','Codigo Barras'), height=5, style="mystyle.Treeview")
+        treeview.grid(column=0, row=1, columnspan=1, padx=10, pady=10, sticky='nsew')
+        
+        # Ocultar las columnas
+        for col in ['#0', '#3', '#5','#2']:
+            treeview.column(col, width=0, stretch=tk.NO)
+        for col in  ['#1','#4']:
+            treeview.column(col, anchor="center")
+
+        # Asignar los encabezados
+        treeview.heading('#1', text='Nombre')
+        treeview.heading('#2', text='Descripción')
+        treeview.heading('#3', text='Precio')
+        treeview.heading('#4', text='Existencias')
+        treeview.heading('#5', text='Codigo Barras')
+
+        treeview.grid(column=0, row=1, columnspan=1)
+        
+        separador1 = ttk.Separator(filtrado_productos_venta, orient="vertical")
+        separador1.grid(column=1, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+
+        separador2 = ttk.Separator(filtrado_productos_venta, orient="vertical")
+        separador2.grid(column=3, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+
+        lbl_pro_sel = CTkLabel(filtrado_productos_venta, text="",font=('OCR A Extended', 15),wraplength=100)
+        lbl_pro_sel.grid(column=2, row=0, padx=(0, 10), pady=10, sticky='w')
+
+        lbl_pro_descripcion = CTkLabel(filtrado_productos_venta, text="",wraplength=110,anchor="w",font=('OCR A Extended', 13)) 
+        lbl_pro_descripcion.grid(column=2, row=1,columnspan=2, padx=(0, 10), pady=10, sticky='w')
+        descripcion = 0
+
+        # Etiqueta y entry para ingresar el precio de venta del producto
+        entry_precio_venta = CTkEntry(filtrado_productos_venta, placeholder_text="\uf688", width=70,height=70,font=("OCR A Extended",20))
+        entry_precio_venta.grid(column=4, row=0, sticky="w", padx=5, pady=5)
+        entry_precio_venta.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
+
+        # Crear el widget Entry para ingresar la cantidad del producto
+        entry_cantidad = CTkEntry(filtrado_productos_venta, placeholder_text="\uf217", width=70,height=70,font=("OCR A Extended",20))        
+        entry_cantidad.grid(column=5, row=0, padx=10, pady=10, sticky='ns')
+        entry_cantidad.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
+
+        #Establecer un valor inicial para entry_cantidad
+        valor_inicial_cantidad = "1"  
+        entry_cantidad.insert(0, valor_inicial_cantidad)
+
+        lbl_subtotal_venta = CTkLabel(filtrado_productos_venta, text="\uf3d1",width=150,height=70,font=("OCR A Extended",30),anchor="center",bg_color="#3B8ED0",corner_radius=32) #wraplength=145,
+        lbl_subtotal_venta.grid(column=4, row=1,columnspan=3, padx=(10, 0), pady=10)
+
+        btn_agregar_articulo = CTkButton(filtrado_productos_venta,text="\uf217 Agregar\narticulo",width=70,height=70,font=("OCR A Extended",14),text_color='black')
+        btn_agregar_articulo.grid(column=6, row=0,columnspan=2, padx=(10, 0), pady=10)
+
+        # Vincular la función de actualización del precio al evento de selección en el Treeview
+        treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion))
+
+        # Actualizar el filtrado para mostrar todos los productos inicialmente
+        self.actualizar_filtrado(None, entry_busqueda_producto, treeview, lbl_pro_sel)
+        # Llamar a actualizar_precio_venta al final de la función ventas
+        self.actualizar_precio_venta(None, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, None, None)
+
+    def actualizar_precio_cantidad(self, event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta):
+        precio = entry_precio_venta.get()
+        cantidad = entry_cantidad.get()
+
+        try:
+            if precio and cantidad:  
+                precio_float = float(precio)
+                cantidad_int = int(cantidad)
+                subtotal = precio_float * cantidad_int
+                subtotal = round(subtotal, 2)#limite decimales
+                lbl_subtotal_venta.configure(text=f'\uf3d1 $ {subtotal}')
+            else:
+                lbl_subtotal_venta.configure(text='\uf3d1 $ 0.0')
+        except ValueError:
+            lbl_subtotal_venta.configure(text='')
+      
+    def actualizar_precio_venta(self, event, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion):
+        # Obtener el ítem seleccionado en el Treeview
+        selected_item = treeview.focus()
+        if selected_item:
+            # Obtener los valores de la fila seleccionada
+            values = treeview.item(selected_item)['values']
+            # El nombre del producto está en la primera posición (índice 0)
+            nombre_producto = values[0]
+            # El precio está en la tercera posición (índice 2)
+            precio = values[2]
+            descripcion = values[1]
+
+            # Actualizar el entry de precio con el valor seleccionado
+            entry_precio_venta.delete(0, tk.END)
+            entry_precio_venta.insert(0, precio)
+
+            # Actualizar la etiqueta con el nombre del producto seleccionado
+            lbl_pro_sel.configure(text=f"{nombre_producto}")
+
+            lbl_pro_descripcion.configure(text=f"{descripcion}")
+
+            # Calcular el subtotal y actualizar la etiqueta
+            self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta)
+             # Hacer que el cursor caiga en el entry de cantidad
+            entry_cantidad.focus()
+
+    def actualizar_filtrado(self, event, entry_busqueda_producto, treeview, lbl_pro_sel):
+        # Obtener el texto de búsqueda
+        texto_busqueda = entry_busqueda_producto.get()
+
+        # Conectar a la base de datos y realizar la consulta
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
+
+        # Limpiar el Treeview
+        for item in treeview.get_children():
+            treeview.delete(item)
+
+        # Consultar la base de datos
+        cursor.execute("SELECT nombre, descripcion, precio_venta, existencias, codigo_barras FROM productos WHERE nombre LIKE ? OR descripcion LIKE ? OR codigo_barras LIKE ?", ('%' + texto_busqueda + '%', '%' + texto_busqueda + '%', '%' + texto_busqueda + '%'))
+        productos = cursor.fetchall()
+
+        # Insertar los datos en el Treeview
+        for producto in productos:
+            treeview.insert('', 'end', values=producto)
+
+        # Cerrar la conexión a la base de datos
+        conn.close()
+
+        # Verificar si hay algún producto seleccionado en el Treeview
+        if not treeview.selection():
+            # Si no hay ningún producto seleccionado, actualizar lbl_pro_sel
+            lbl_pro_sel.configure(text="Seleccione un producto")
+
+    def nueva_venta():
+        
+        
+        pass
+
+
+
+#------------------------FUNCIONES PARA CLIENTE-------------------------------
+
+    def mostrar_clientes(self):
+        # Definir el estilo general para los botones
+        ESTILO_CTKBOTONES = {
+            'width': 70,
+            'height': 70,
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13,"bold")
+        }
+        # Función para mostrar la lista de clientes
+        for widget in self.cuerpo_principal.winfo_children():
+            widget.destroy()
+        
+
+        frame_tree_clientes = tk.Frame(self.cuerpo_principal,bg=COLOR_CUERPO_PRINCIPAL)
+        frame_tree_clientes.pack(pady=10, padx=10, side="right", fill="both", expand=True)
+        
+        # Crear el estilo para el Treeview
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 10))
+        style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 11, 'bold'))
+        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+
+        # Aplicar el estilo al Treeview
+        tabla_cliente = ttk.Treeview(frame_tree_clientes, columns=("Cédula", "Nombre", "Teléfono", "Dirección", "Email"), displaycolumns=("Cédula", "Nombre", "Teléfono", "Dirección", "Email"), style="mystyle.Treeview")
+        tabla_cliente.heading("#0", text="", anchor="center")  # Eliminar encabezado de índice
+        tabla_cliente.heading("Cédula", text="CEDULA")
+        tabla_cliente.heading("Nombre", text="NOMBRE")
+        tabla_cliente.heading("Teléfono", text="TELEFONO")
+        tabla_cliente.heading("Dirección", text="DIRECCION")
+        tabla_cliente.heading("Email", text="EMAIL")
+        tabla_cliente.column("#0", width=0, stretch=tk.NO)  # Hacer que la columna de índice no sea visible
+        tabla_cliente.column("Cédula", width=70)
+        tabla_cliente.column("Nombre", width=110)
+        tabla_cliente.column("Teléfono", width=70)
+        tabla_cliente.column("Dirección", width=120)
+        tabla_cliente.column("Email", width=150)
+        tabla_cliente.pack(side="top", expand=True, fill="both")
+
+        # Botón Editar
+        btn_editar = CTkButton(frame_tree_clientes, text="Editar", **ESTILO_CTKBOTONES)
+        btn_editar.pack(side="left", padx=5, pady=5)
+
+        # Botón Eliminar
+        btn_eliminar = CTkButton(frame_tree_clientes, text="Eliminar", **ESTILO_CTKBOTONES)
+        btn_eliminar.pack(side="left", padx=5, pady=5)
+
+        # Formulario de ingreso de cliente
+        frame_formulario_cliente = tk.Frame(self.cuerpo_principal,bg=COLOR_CUERPO_PRINCIPAL)
+        frame_formulario_cliente.pack(pady=10, side="left")
+
+        lbl_titulo = CTkLabel(frame_formulario_cliente, text="Ingreso de Clientes", font=("OCR A Extended", 16, "bold"))
+        lbl_titulo.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
+
+        lbl_id = CTkLabel(frame_formulario_cliente, text="id:",font=("OCR A Extended", 13, "bold"))
+        lbl_id.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        entry_id = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_id.grid(row=2, column=1, padx=5, pady=5)
     
+        lbl_cedula = CTkLabel(frame_formulario_cliente, text="Cédula:",font=("OCR A Extended", 13, "bold"))
+        lbl_cedula.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        entry_cedula = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_cedula.grid(row=3, column=1, padx=5, pady=5)
+
+        lbl_nombre = CTkLabel(frame_formulario_cliente, text="Nombre:",font=("OCR A Extended", 13, "bold"))
+        lbl_nombre.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        entry_nombre = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_nombre.grid(row=4, column=1, padx=5, pady=5)
+
+        lbl_telefono = CTkLabel(frame_formulario_cliente, text="Teléfono:",font=("OCR A Extended", 13, "bold"))
+        lbl_telefono.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+        entry_telefono = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_telefono.grid(row=5, column=1, padx=5, pady=5)
+
+        lbl_direccion = CTkLabel(frame_formulario_cliente, text="Dirección:",font=("OCR A Extended", 13, "bold"))
+        lbl_direccion.grid(row=6, column=0, padx=5, pady=5, sticky="w")
+        entry_direccion = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_direccion.grid(row=6, column=1, padx=5, pady=5)
+
+        lbl_email = CTkLabel(frame_formulario_cliente, text="Email:",font=("OCR A Extended", 13, "bold"))
+        lbl_email.grid(row=7, column=0, padx=5, pady=5, sticky="w")
+        entry_email = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_email.grid(row=7, column=1, padx=5, pady=5)
+
+        btn_guardar = CTkButton(frame_formulario_cliente, text="Guardar",**ESTILO_CTKBOTONES)
+        btn_guardar.grid(row=8, column=1, padx=5, pady=5, sticky="ns")
+        
+#--------------------------FUNCIONES PARA DATOS DEL NEGOCIO--------------------------------
+    def datos_negocio(self):
+
+        # Definir el estilo general para los botones
+        ESTILO_CTKBOTONES_DATOS_NEGO = {
+            'width': 50,
+            'height': 50,
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13,"bold")
+        }
+
+        ESTILO_TITULO_LABEL_DATOS_NEGO = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 15, "bold"),  
+        }
+
+        ESTILO_ENTRYS_LABEL_DATOS_NEGO = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13),
+            'width': 200      
+        }
+
+        global conexion, cursor
+        conexion = sqlite3.connect('farmacia.db')
+        cursor = conexion.cursor()
+        for widget in self.cuerpo_principal.winfo_children():
+            widget.destroy()
+
+        def generar_clave():
+            caracteres = string.ascii_letters + string.digits
+            return ''.join(random.choice(caracteres) for _ in range(8))
+
+        def insertar_datos(conexion):
+            try:
+                # Obtener los valores de los campos de entrada
+                datos = (nombre_negocio.get(), ruc.get(), direccion.get(), telefono.get(), email.get())
+
+                # Verificar si hay datos existentes
+                cursor.execute('SELECT COUNT(*) FROM datos_negocio')
+                count = cursor.fetchone()[0]
+
+                if count == 0:
+                    # Si no hay registros, insertar uno nuevo
+                    cursor.execute('INSERT INTO datos_negocio (nombre_negocio, ruc, direccion, telefono, email) VALUES (?, ?, ?, ?, ?)', datos)
+                else:
+                    # Si ya hay un registro, actualizarlo
+                    cursor.execute('UPDATE datos_negocio SET nombre_negocio=?, ruc=?, direccion=?, telefono=?, email=?', datos)
+
+                conexion.commit()
+                mostrar_datos_actuales()
+                messagebox.showinfo("Éxito", "Los datos se han guardado correctamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudieron guardar los datos. Error: {str(e)}")
+
+
+
+                # Función para llenar los entrys con los datos actuales del negocio
+        def llenar_entrys():
+            cursor.execute('SELECT * FROM datos_negocio')
+            datos = cursor.fetchone()
+            if datos:
+                # Obtener el id del registro actual para su posterior actualización
+                id_registro = datos[0]
+
+                # Actualizar los campos de entrada con los datos recuperados de la base de datos
+                nombre_negocio.delete(0, 'end')
+                nombre_negocio.insert(0, datos[1])
+                ruc.delete(0, 'end')
+                ruc.insert(0, datos[2])
+                direccion.delete(0, 'end')
+                direccion.insert(0, datos[3])
+                telefono.delete(0, 'end')
+                telefono.insert(0, datos[4])
+                email.delete(0, 'end')
+                email.insert(0, datos[5])
+
+                # Retornar el id del registro actual para su posterior uso en la actualización
+                return id_registro
+            else:
+                messagebox.showerror("Error", "No hay datos para mostrar.")
+                return None
+
+
+        # Función para mostrar los datos actuales del negocio sin llenar los entrys
+        def mostrar_datos_actuales():
+            cursor.execute('SELECT * FROM datos_negocio')
+            datos = cursor.fetchone()
+            if datos:
+                lbl_nombre.configure(text=datos[1])
+                lbl_ruc.configure(text=datos[2])
+                lbl_direccion.configure(text=datos[3])
+                lbl_telefono.configure(text=datos[4])
+                lbl_email.configure(text=datos[5])
+
+        # Crear Frames
+        frame_formulario = tk.Frame(self.cuerpo_principal,bg=COLOR_CUERPO_PRINCIPAL)
+        frame_formulario.grid(row=0,columnspan=2,column=0, padx=10, pady=10)
+
+        frame_datos_actuales = tk.Frame(self.cuerpo_principal,bg=COLOR_CUERPO_PRINCIPAL)
+        frame_datos_actuales.grid(row=1, column=0, padx=10, pady=10)
+
+        # Crear etiquetas y entradas para el formulario
+        lbl_titulo_formulario_nego = CTkLabel(frame_formulario, text="I N G R E S O   D E   D A T O S",**ESTILO_TITULO_LABEL_DATOS_NEGO )
+        lbl_titulo_formulario_nego.grid(row=0, columnspan=2, padx=5, pady=5, sticky="w")
+
+        CTkLabel(frame_formulario, text="Nombre del Negocio:",**ESTILO_ENTRYS_LABEL_DATOS_NEGO).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        nombre_negocio = CTkEntry(frame_formulario,**ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        nombre_negocio.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+
+        CTkLabel(frame_formulario, text="RUC:",**ESTILO_ENTRYS_LABEL_DATOS_NEGO).grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        ruc = CTkEntry(frame_formulario,**ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        ruc.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+
+        CTkLabel(frame_formulario, text="Dirección:",**ESTILO_ENTRYS_LABEL_DATOS_NEGO).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        direccion = CTkEntry(frame_formulario,**ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        direccion.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+
+        CTkLabel(frame_formulario, text="Teléfono:",**ESTILO_ENTRYS_LABEL_DATOS_NEGO).grid(row=4, column=0, padx=5, pady=5, sticky="e")
+        telefono = CTkEntry(frame_formulario,**ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        telefono.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+
+        CTkLabel(frame_formulario, text="Email:",**ESTILO_ENTRYS_LABEL_DATOS_NEGO).grid(row=5, column=0, padx=5, pady=5, sticky="e")
+        email = CTkEntry(frame_formulario,**ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        email.grid(row=5, column=1, padx=5, pady=5, sticky="w")
+        
+        # Botón para guardar los datos
+        btn_guardar = CTkButton(frame_formulario, text="Guardar Datos", **ESTILO_CTKBOTONES_DATOS_NEGO, command=lambda: insertar_datos(conexion))
+        btn_guardar.grid(row=6, columnspan=2, padx=5, pady=5)
+        
+        # Crear etiquetas para mostrar los datos actuales del negocio
+        lbl_nombre = CTkLabel(frame_datos_actuales, text="", **ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        lbl_nombre.grid(row=0, padx=5, pady=5, sticky="nsew")
+
+        lbl_ruc = CTkLabel(frame_datos_actuales, text="", **ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        lbl_ruc.grid(row=1, padx=5, pady=5, sticky="nsew")
+
+        lbl_direccion = CTkLabel(frame_datos_actuales, text="", **ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        lbl_direccion.grid(row=2, padx=5, pady=5, sticky="nsew")
+
+        lbl_telefono = CTkLabel(frame_datos_actuales, text="", **ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        lbl_telefono.grid(row=3, padx=5, pady=5, sticky="nsew")
+
+        lbl_email = CTkLabel(frame_datos_actuales, text="", **ESTILO_ENTRYS_LABEL_DATOS_NEGO)
+        lbl_email.grid(row=4, padx=5, pady=5, sticky="nsew")
+
+        # Crear botón "Editar" para llenar los entrys con los datos actuales
+        btn_editar = CTkButton(frame_datos_actuales, text="Editar Datos", **ESTILO_CTKBOTONES_DATOS_NEGO, command=llenar_entrys)
+        btn_editar.grid(row=5, padx=5, pady=5, sticky="nsew")
+
+        mostrar_datos_actuales()
+   
+
+
+
 
 
 
