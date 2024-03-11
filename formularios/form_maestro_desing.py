@@ -12,6 +12,7 @@ import openpyxl
 from datetime import datetime
 import random
 import string
+from tkinter import scrolledtext
 
 
 
@@ -70,7 +71,7 @@ class FormularioMaestroDesing(tk.Tk):
     def controles_menu_lateral(self):
         ancho_menu = 24
         alto_menu = 2
-        font_awesome = font.Font(family='FontAweson',size=15)
+        font_awesome = font.Font(family='OCR A Extended',size=14)
 
         self.labelPerfil =tk.Label(
             self.menu_lateral, image=self.perfil, bg=COLOR_MENU_LATERAL)
@@ -80,18 +81,18 @@ class FormularioMaestroDesing(tk.Tk):
         self.buttonIngresoVentas = tk.Button(self.menu_lateral,command=self.ventas) 
         self.buttonHistorialVentas = tk.Button(self.menu_lateral) 
        # self.buttonProveedores= tk.Button(self.menu_lateral) 
-        self.buttonClientes = tk.Button(self.menu_lateral,command=self.mostrar_clientes)  
-        self.buttonDatosNegocio = tk.Button(self.menu_lateral,command=self.datos_negocio)
+       # self.buttonClientes = tk.Button(self.menu_lateral,command=self.mostrar_clientes)  
+       # self.buttonDatosNegocio = tk.Button(self.menu_lateral,command=self.datos_negocio)
         self.buttonUsuarios = tk.Button(self.menu_lateral)
      
         buttons_info = [
-        ("Inventario", "\uf494", self.buttonInventario), 
-        ("Ingreso Ventas", "\uf788", self.buttonIngresoVentas), 
-        ("Historial Ventas", "\uf07a", self.buttonHistorialVentas), 
+        ("INVENTARIO", "\uf494", self.buttonInventario), 
+        ("CAJA REGISTRADORA", "\uf788", self.buttonIngresoVentas), 
+        ("HISTORIAL VENTAS", "\uf073", self.buttonHistorialVentas), 
         #("Proveedores", "\ue58d", self.buttonProveedores),
-        ("Clientes", "\uf007", self.buttonClientes),
-        ("Datos Negocio", "\uf54e", self.buttonDatosNegocio),
-        ("Usuarios", "\ue594", self.buttonUsuarios),
+        #("CLIENTES", "\uf007", self.buttonClientes),
+        #("DATOS NEGOCIO", "\uf54e", self.buttonDatosNegocio),
+        ("USUARIOS", "\ue594", self.buttonUsuarios),
         ]
 
         for text, icon, button in buttons_info:
@@ -795,43 +796,58 @@ class FormularioMaestroDesing(tk.Tk):
         for widget in self.cuerpo_principal.winfo_children():
             widget.destroy()
 
-        # Crear el frame para los botones de acceso rápido
-        botones_accesos_rapidos = tk.Frame(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
+#-----------------------FRAMES -----------------------------------------------------------------------------------
+        botones_accesos_rapidos = tk.LabelFrame(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         botones_accesos_rapidos.pack(fill='x', padx=10, pady=(10, 0))
+        
+
+        filtrado_productos_venta = tk.LabelFrame(self.cuerpo_principal, text="BUSQUEDA PRODUCTOS", 
+                                                 background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
+        filtrado_productos_venta.pack(fill='x', padx=10, pady=10)
+       
+
+        detalles_venta = tk.LabelFrame(self.cuerpo_principal, text="DETALLES", 
+                                       background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
+        detalles_venta.pack(fill="none",side="left", padx=10, pady=(10, 0))
+       
+
+        detalles_acciones = tk.LabelFrame(self.cuerpo_principal, 
+                                       background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
+        detalles_acciones.pack(fill="none",side="left", padx=10, pady=(10, 0))
+       
+
+        detalles_totales_frame = tk.LabelFrame(self.cuerpo_principal,text="TOTALES",
+                                               background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
+        detalles_totales_frame.pack(fill="none",side="left", padx=10, pady=(10, 0))
+       
 
         # Crear los botones de acceso rápido
         boton_nueva_venta = CTkButton(botones_accesos_rapidos, text="NUEVA\nVENTA",width=70,height=70,text_color='black',font=("OCR A Extended",12))
         boton_nueva_venta.grid(column=0, row=0, padx=10, pady=10)
+        boton_nueva_venta.configure(command=lambda: self.restablecer_valores(entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
+                                                                     entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
+                                                                     detalles_treeview,entry_nombre_producto_noinv, entry_precio_producto_detalle, entry_cantidad_producto_detalle, lbl_total_venta))
 
-        boton_ingreso_producto_hurfano = CTkButton(botones_accesos_rapidos, 
-                                            text="INGRESO\nPRODUCTO\nBAJO PEDIDO", 
-                                            width=70, height=70, text_color='black',font=("OCR A Extended",12))
-        boton_ingreso_producto_hurfano.grid(column=1, row=0, padx=10, pady=10)
 
+        inicio_caja = CTkButton(botones_accesos_rapidos, text="INICIO\nDE\nOPERACIONES",width=70, height=70, text_color='black',font=("OCR A Extended",12))
+        inicio_caja.grid(column=2,row=0, padx=10, pady=10)
+
+        cierre_caja = CTkButton(botones_accesos_rapidos, text="CIERRE\nDE\nCAJA",width=70, height=70, text_color='black',font=("OCR A Extended",12))
+        cierre_caja.grid(column=3,row=0, padx=10, pady=10)
         
-        opcion_sinfac_confac = CTkOptionMenu(botones_accesos_rapidos, 
-                                values=["Venta sin comprobante", "Venta con comprobante"], 
-                                width=200, 
-                                font=("OCR A Extended", 12),text_color='black')
-        opcion_sinfac_confac.grid(column=2, row=0, padx=10, pady=10)
-
-
-        # Crear el frame para el filtrado de productos
-        filtrado_productos_venta = tk.LabelFrame(self.cuerpo_principal, text="Búsqueda de producto", background=COLOR_CUERPO_PRINCIPAL, font=("OCR A Extended",12))
-        filtrado_productos_venta.pack(fill="x", padx=10, pady=(0, 10))
 
         # Entry para ingresar el término de búsqueda
         entry_busqueda_producto = CTkEntry(filtrado_productos_venta, bg_color=COLOR_CUERPO_PRINCIPAL, width=300, 
                                         placeholder_text="\uf02a Ingrese Cod barras, Nombre o Descripcion",font=("OCR A Extended",14))
         entry_busqueda_producto.grid(column=0, row=0, padx=(10, 5), pady=10, sticky='ew')
         # Vincular la función de actualización al evento de modificación del Entry
-        entry_busqueda_producto.bind('<KeyRelease>', lambda event: self.actualizar_filtrado(event, entry_busqueda_producto, treeview, lbl_pro_sel))
+        entry_busqueda_producto.bind('<KeyRelease>', lambda event: self.actualizar_filtrado(event, entry_busqueda_producto, treeview, lbl_pro_sel,lbl_pro_descripcion))
 
         # Crear el estilo para el Treeview
         style = ttk.Style()
         style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 10))
         style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 11, 'bold'))
-        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+        
 
         # Aplicar el estilo al Treeview
         treeview = ttk.Treeview(filtrado_productos_venta, columns=('Nombre', 'Descripción', 'Precio','Existencias','Codigo Barras'), height=5, style="mystyle.Treeview")
@@ -851,63 +867,169 @@ class FormularioMaestroDesing(tk.Tk):
         treeview.heading('#5', text='Codigo Barras')
 
         treeview.grid(column=0, row=1, columnspan=1)
-        
-        separador1 = ttk.Separator(filtrado_productos_venta, orient="vertical")
-        separador1.grid(column=1, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+                    
+       # Fondo deseado
+        fondo = "#F9F9FA"
 
-        separador2 = ttk.Separator(filtrado_productos_venta, orient="vertical")
-        separador2.grid(column=3, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
-
-        lbl_pro_sel = CTkLabel(filtrado_productos_venta, text="",font=('OCR A Extended', 15),wraplength=100)
+        # Crear los widgets ScrolledText con el fondo deseado
+        lbl_pro_sel = scrolledtext.ScrolledText(filtrado_productos_venta, wrap="word", width=20, height=2, font=('OCR A Extended', 13))
         lbl_pro_sel.grid(column=2, row=0, padx=(0, 10), pady=10, sticky='w')
+        lbl_pro_sel.config(bg=fondo)  # Establecer el fondo
 
-        lbl_pro_descripcion = CTkLabel(filtrado_productos_venta, text="",wraplength=110,anchor="w",font=('OCR A Extended', 13)) 
-        lbl_pro_descripcion.grid(column=2, row=1,columnspan=2, padx=(0, 10), pady=10, sticky='w')
+        lbl_pro_descripcion = scrolledtext.ScrolledText(filtrado_productos_venta, wrap="word", width=20, height=7, font=('OCR A Extended', 13))
+        lbl_pro_descripcion.grid(column=2, row=1, columnspan=2, padx=(0, 10), pady=10, sticky='w')
+        lbl_pro_descripcion.config(bg=fondo)  # Establecer el fondo
+
+        separador1 = ttk.Separator(filtrado_productos_venta, orient="vertical")
+        separador1.grid(column=3, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+        
+        
+        
+        entry_nombre_producto_noinv = CTkEntry(filtrado_productos_venta, placeholder_text="INGRESE NOMBRE PRODUCTO",font=("OCR A Extended", 12),width=230)
+        entry_nombre_producto_noinv.grid(column=4, row=0,columnspan=2)
+        entry_nombre_producto_noinv.bind("<Button-1>",lambda event: self.deselect_item(event,lbl_pro_sel,lbl_pro_descripcion,treeview,
+                                                                                       entry_precio_venta,entry_cantidad,entry_busqueda_producto,lbl_subtotal_venta))
+        
+        
         descripcion = 0
 
-        # Etiqueta y entry para ingresar el precio de venta del producto
-        entry_precio_venta = CTkEntry(filtrado_productos_venta, placeholder_text="\uf688", width=70,height=70,font=("OCR A Extended",20))
-        entry_precio_venta.grid(column=4, row=0, sticky="w", padx=5, pady=5)
+        entry_precio_venta = CTkEntry(filtrado_productos_venta, placeholder_text="PRECIO $", width=90, height=70, font=("OCR A Extended", 14))
+        entry_precio_venta.grid(column=4, row=1)#, sticky="w", padx=5, pady=5)
         entry_precio_venta.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
 
-        # Crear el widget Entry para ingresar la cantidad del producto
-        entry_cantidad = CTkEntry(filtrado_productos_venta, placeholder_text="\uf217", width=70,height=70,font=("OCR A Extended",20))        
-        entry_cantidad.grid(column=5, row=0, padx=10, pady=10, sticky='ns')
+        entry_cantidad = CTkEntry(filtrado_productos_venta, placeholder_text="CANTIDAD", width=90, height=70, font=("OCR A Extended", 14))
+        entry_cantidad.grid(column=5, row=1)#, sticky='W', padx=5, pady=5)
+
         entry_cantidad.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
+        entry_cantidad.bind("<Return>", lambda event: self.agregar_articulo(treeview, entry_cantidad, entry_precio_venta, entry_nombre_producto_noinv, detalles_treeview, calcular_total_venta))
+        entry_cantidad.bind("<space>", lambda event: self.agregar_articulo(treeview, entry_cantidad, entry_precio_venta, entry_nombre_producto_noinv, detalles_treeview, calcular_total_venta))
 
-        #Establecer un valor inicial para entry_cantidad
-        valor_inicial_cantidad = "1"  
-        entry_cantidad.insert(0, valor_inicial_cantidad)
+        lbl_subtotal_venta = CTkLabel(filtrado_productos_venta, text="subtotal\n$", width=70, height=50, font=("OCR A Extended", 20), anchor="center", bg_color="#F9F9FA")
+        lbl_subtotal_venta.grid(column=6, row=1,sticky='nwse', padx=10, pady=10)
 
-        lbl_subtotal_venta = CTkLabel(filtrado_productos_venta, text="\uf3d1",width=150,height=70,font=("OCR A Extended",30),anchor="center",bg_color="#3B8ED0",corner_radius=32) #wraplength=145,
-        lbl_subtotal_venta.grid(column=4, row=1,columnspan=3, padx=(10, 0), pady=10)
-
-        btn_agregar_articulo = CTkButton(filtrado_productos_venta,text="\uf217 Agregar\narticulo",width=70,height=70,font=("OCR A Extended",14),text_color='black')
-        btn_agregar_articulo.grid(column=6, row=0,columnspan=2, padx=(10, 0), pady=10)
+        
+        btn_agregar_articulo = CTkButton(filtrado_productos_venta, text="\uf217 Agregar\narticulo", width=70, height=70, font=("OCR A Extended", 14), 
+                                         text_color='black', command=lambda: self.agregar_articulo(treeview, entry_cantidad, entry_precio_venta,entry_nombre_producto_noinv, detalles_treeview, calcular_total_venta))
+        btn_agregar_articulo.grid(column=6, row=0,sticky='nwse', padx=10, pady=10)
 
         # Vincular la función de actualización del precio al evento de selección en el Treeview
-        treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion))
+        treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, 
+                                                                                       entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion))
 
         # Actualizar el filtrado para mostrar todos los productos inicialmente
-        self.actualizar_filtrado(None, entry_busqueda_producto, treeview, lbl_pro_sel)
+        self.actualizar_filtrado(None, entry_busqueda_producto, treeview, lbl_pro_sel,lbl_pro_descripcion)
         # Llamar a actualizar_precio_venta al final de la función ventas
         self.actualizar_precio_venta(None, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, None, None)
 
-    def actualizar_precio_cantidad(self, event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta):
-        precio = entry_precio_venta.get()
-        cantidad = entry_cantidad.get()
+        # Crear el estilo para el Treeview
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 10), background="#F9F9FA")
+        style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 11, 'bold'), background="#F9F9FA")
 
-        try:
-            if precio and cantidad:  
-                precio_float = float(precio)
-                cantidad_int = int(cantidad)
-                subtotal = precio_float * cantidad_int
-                subtotal = round(subtotal, 2)#limite decimales
-                lbl_subtotal_venta.configure(text=f'\uf3d1 $ {subtotal}')
-            else:
-                lbl_subtotal_venta.configure(text='\uf3d1 $ 0.0')
-        except ValueError:
-            lbl_subtotal_venta.configure(text='')
+        # Aplicar el estilo al Treeview
+        detalles_treeview = ttk.Treeview(detalles_venta, columns=("Producto", "Cantidad", "Precio", "SubTotal"), 
+                                        height=9, style="mystyle.Treeview")
+
+        # Ocultar la primera columna
+        detalles_treeview.column("#0", width=0, stretch=tk.NO)
+
+        # Configurar las columnas del Treeview
+        detalles_treeview.heading("#0", text="ID")
+        detalles_treeview.heading("Producto", text="Producto")
+        detalles_treeview.heading("Cantidad", text="Cantidad")
+        detalles_treeview.heading("Precio", text="Precio")
+        detalles_treeview.heading("SubTotal", text="Subtotal")
+
+        # Ajustar el ancho de las columnas
+        detalles_treeview.column("Producto", width=130, anchor="center")
+        detalles_treeview.column("Cantidad", width=90, anchor="center")
+        detalles_treeview.column("Precio", width=90, anchor="center")
+        detalles_treeview.column("SubTotal", width=90, anchor="center")
+
+        detalles_treeview.grid(column=0, row=0, columnspan=1, padx=10, pady=10, sticky='nsew')
+
+        detalles_treeview.bind("<<TreeviewSelect>>", lambda event: self.on_treeview_select(event, detalles_treeview, entry_precio_producto_detalle, entry_cantidad_producto_detalle,
+                                                                                    lbl_pro_sel, lbl_pro_descripcion, treeview,
+                                                                                    entry_precio_venta, entry_cantidad, entry_busqueda_producto, lbl_subtotal_venta))
+        lbl_precio_producto_detalle =CTkLabel(detalles_acciones,text="PRECIO",font=("OCR A Extended",15))
+        lbl_precio_producto_detalle.grid(column=2,row=0,padx=10,pady=10)
+
+        entry_precio_producto_detalle = CTkEntry(detalles_acciones,placeholder_text="\uf53d", 
+                                                 width=70,height=70,font=("OCR A Extended",20))
+        entry_precio_producto_detalle.grid(column=2, row=1, padx=10, pady=10)
+
+        lbl_cantidad_producto_detalle = CTkLabel(detalles_acciones,text="CANTIDAD",font=("OCR A Extended",15))
+        lbl_cantidad_producto_detalle.grid(column=3, row=0, padx=10, pady=10)
+                                                
+        entry_cantidad_producto_detalle = CTkEntry(detalles_acciones,placeholder_text="\ue43c", 
+                                                   width=70,height=70,font=("OCR A Extended",20))                                              
+        entry_cantidad_producto_detalle.grid(column=3, row=1, padx=10, pady=10)
+
+        
+        boton_editar_detalle_venta = CTkButton(detalles_acciones, text="REALIZAR\nCAMBIO", 
+                                       width=70, height=50, text_color='black', 
+                                       font=("OCR A Extended", 12),
+                                       command=lambda: self.editar_detalle_seleccionado(detalles_treeview, lbl_total_venta, entry_precio_producto_detalle, entry_cantidad_producto_detalle))
+        boton_editar_detalle_venta.grid(column=3, row=2, padx=10, pady=10)
+
+        boton_borrar_detalle_venta = CTkButton(detalles_acciones, text="ELIMINAR\nPRODUCTO\nDE LA VENTA", 
+                                        width=70, height=50, text_color='black', font=("OCR A Extended", 12),
+                                        command=lambda: self.borrar_detalle_seleccionado(detalles_treeview,lbl_total_venta))
+        boton_borrar_detalle_venta.grid(column=2, row=2, padx=10, pady=10)      
+
+
+        separador1 = ttk.Separator(detalles_acciones, orient="vertical")
+        separador1.grid(column=4, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+
+        lbl_titulo01 = CTkLabel(detalles_acciones, text="TOTALES",
+                                   font=("OCR A Extended",15),anchor="center")
+        lbl_titulo01.grid(column=5, row=0,padx=5,pady=5)
+
+        lbl_total_venta = CTkLabel(detalles_acciones, text="A pagar:\n$"
+                                   , width=70, height=50,
+                                   font=("OCR A Extended",25),anchor="center",
+                                   bg_color="#F9F9FA",corner_radius=32)
+        lbl_total_venta.grid(column=5, row=1,padx=5,pady=5)
+
+        boton_grabar_venta = CTkButton(detalles_acciones, text="GRABAR\nVENTA",
+                                            width=70, height=50, text_color='black',
+                                            font=("OCR A Extended",12))
+        boton_grabar_venta.grid(column=5, row=2,padx=5,pady=5)
+        
+
+
+        def calcular_total_venta(self,detalles_treeview):
+            # Obtener todas las filas del Treeview de detalles de venta
+            filas = detalles_treeview.get_children()
+
+            # Inicializar el total de la venta
+            total_venta = 0
+
+            # Iterar sobre todas las filas y sumar los subtotales
+            for fila in filas:
+                subtotal = float(detalles_treeview.item(fila, 'values')[-1])
+                total_venta += subtotal
+                total_venta = round(total_venta,2)
+
+            # Mostrar el total de la venta en la etiqueta
+            lbl_total_venta.configure(text="A pagar:\n${}".format(total_venta))
+        
+    def actualizar_precio_cantidad(self, event=None, entry_precio_venta=None, entry_cantidad=None, lbl_subtotal_venta=None):
+        if entry_precio_venta and entry_cantidad and lbl_subtotal_venta:
+            precio = entry_precio_venta.get()
+            cantidad = entry_cantidad.get()
+
+            try:
+                if precio and cantidad:  
+                    precio_float = float(precio)
+                    cantidad_int = int(cantidad)
+                    subtotal = precio_float * cantidad_int
+                    subtotal = round(subtotal, 2)  # limite decimales
+                    lbl_subtotal_venta.configure(text=f'subtotal\n$ {subtotal}')
+                else:
+                    lbl_subtotal_venta.configure(text='subtotal\n$ 0.0')
+            except ValueError:
+                lbl_subtotal_venta.configure(text='')
       
     def actualizar_precio_venta(self, event, entry_precio_venta, treeview, entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion):
         # Obtener el ítem seleccionado en el Treeview
@@ -926,16 +1048,23 @@ class FormularioMaestroDesing(tk.Tk):
             entry_precio_venta.insert(0, precio)
 
             # Actualizar la etiqueta con el nombre del producto seleccionado
-            lbl_pro_sel.configure(text=f"{nombre_producto}")
+            lbl_pro_sel.delete("1.0",tk.END)
+            lbl_pro_sel.insert(tk.END,nombre_producto)
 
-            lbl_pro_descripcion.configure(text=f"{descripcion}")
+            # Limpiar el ScrolledText y luego insertar la nueva descripción
+            lbl_pro_descripcion.delete("1.0", tk.END)  # Limpiar el ScrolledText
+            lbl_pro_descripcion.insert(tk.END, descripcion)  # Insertar la nueva descripción
 
-            # Calcular el subtotal y actualizar la etiqueta
-            self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta)
+            
              # Hacer que el cursor caiga en el entry de cantidad
             entry_cantidad.focus()
 
-    def actualizar_filtrado(self, event, entry_busqueda_producto, treeview, lbl_pro_sel):
+            entry_cantidad.delete(0, tk.END)
+            entry_cantidad.insert(0, "1")
+            # Calcular el subtotal y actualizar la etiqueta
+            self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta)
+
+    def actualizar_filtrado(self, event, entry_busqueda_producto, treeview, lbl_pro_sel,lbl_pro_descripcion):
         # Obtener el texto de búsqueda
         texto_busqueda = entry_busqueda_producto.get()
 
@@ -961,14 +1090,213 @@ class FormularioMaestroDesing(tk.Tk):
         # Verificar si hay algún producto seleccionado en el Treeview
         if not treeview.selection():
             # Si no hay ningún producto seleccionado, actualizar lbl_pro_sel
-            lbl_pro_sel.configure(text="Seleccione un producto")
+            lbl_pro_sel.delete("1.0", tk.END)  # Eliminar cualquier texto actual en lbl_pro_sel
+            lbl_pro_sel.insert(tk.END, "NOMBRE")
 
-    def nueva_venta():
+            lbl_pro_descripcion.delete("1.0", tk.END)  # Limpiar el ScrolledText
+            lbl_pro_descripcion.insert(tk.END, "DESCRIPCION")  # Insertar la nueva descripción
+
+    def agregar_articulo(self, treeview, entry_cantidad, entry_precio_venta, entry_nombre_producto_noinv, detalles_treeview, calcular_total_venta):
+        # Obtener el índice seleccionado en el Treeview de productos
+        seleccion = treeview.selection()
+
+        # Verificar si se ha seleccionado un producto desde el Treeview
+        if seleccion:
+            # Obtener los datos del producto seleccionado
+            item = treeview.item(seleccion)
+            nombre_producto = item['values'][0]
+            precio_producto = float(item['values'][2])  # Convertir a float
+        else:
+            # Obtener los datos ingresados manualmente
+            nombre_producto = entry_nombre_producto_noinv.get()
+            precio_producto = entry_precio_venta.get()
+
+        # Verificar si se proporcionó un nombre de producto y un precio válido
+        if nombre_producto and precio_producto:
+            try:
+                # Verificar si el precio es un número positivo
+                precio_producto = float(precio_producto)
+                if precio_producto > 0:
+                    # Obtener la cantidad especificada por el usuario
+                    cantidad = entry_cantidad.get()
+
+                    # Verificar si la cantidad es válida (es un número entero positivo)
+                    if cantidad.isdigit() and int(cantidad) > 0:
+                        # Verificar si el producto ya existe en el Treeview de detalles
+                        productos_detalles = detalles_treeview.get_children()
+                        producto_existente = False
+
+                        for producto in productos_detalles:
+                            valores = detalles_treeview.item(producto, 'values')
+                            if valores[0] == nombre_producto:
+                                producto_existente = True
+                                break
+
+                        if not producto_existente:
+                            # Calcular el subtotal para el producto agregado
+                            subtotal = int(cantidad) * float(precio_producto)
+                            subtotal = round(subtotal, 2)
+
+                            # Agregar una nueva fila al Treeview de detalles de venta con la información del producto y la cantidad
+                            detalles_treeview.insert("", "end", values=(nombre_producto, cantidad, precio_producto, subtotal))
+
+                            # Limpiar los campos de entrada
+                            entry_cantidad.delete(0, 'end')
+                            entry_nombre_producto_noinv.delete(0, 'end')
+                            entry_precio_venta.delete(0, 'end')
+
+                            # Calcular y mostrar el total de la venta
+                            calcular_total_venta(self, detalles_treeview)
+                        else:
+                            # Mostrar un mensaje de error si el producto ya existe en detalles_treeview
+                            messagebox.showerror("Error", "El producto ya existe en la lista de detalles, puedes editar ahí el precio y la cantidad a vender.")
+                    else:
+                        # Mostrar un mensaje de error si la cantidad no es válida
+                        messagebox.showerror("Error", "La cantidad ingresada no es válida o no es un número entero positivo.")
+                else:
+                    # Mostrar un mensaje de error si el precio no es positivo
+                    messagebox.showerror("Error", "El precio ingresado debe ser un número positivo.")
+            except ValueError:
+                # Mostrar un mensaje de error si el precio no es un número válido
+                messagebox.showerror("Error", "El precio ingresado no es válido.")
+        else:
+            # Mostrar un mensaje de error si no se proporcionó nombre de producto o precio
+            messagebox.showerror("Error", "Por favor, ingrese nombre de producto y precio antes de agregarlo a la venta.")
+
+    def actualizar_campos_entrada(self, detalles_treeview, entry_precio_producto_detalle, entry_cantidad_producto_detalle):
+        selected_item = detalles_treeview.focus()
+
+        if selected_item:
+            values = detalles_treeview.item(selected_item)['values']
+            nombre_producto = values[0]
+            cantidad = values[1]
+            precio = values[2]
+
+            entry_cantidad_producto_detalle.delete(0, 'end')
+            entry_precio_producto_detalle.delete(0, 'end')
+
+            entry_cantidad_producto_detalle.insert(0, cantidad)
+            entry_precio_producto_detalle.insert(0, precio)
+
+    def borrar_detalle_seleccionado(self, detalles_treeview,lbl_total_venta):
+        selected_item = detalles_treeview.selection()
+
+        if selected_item:
+            detalles_treeview.delete(selected_item)
+            
+            filas = detalles_treeview.get_children()
+
+            # Inicializar el total de la venta
+            total_venta = 0
+
+            # Iterar sobre todas las filas y sumar los subtotales
+            for fila in filas:
+                subtotal = float(detalles_treeview.item(fila, 'values')[-1])
+                total_venta += subtotal
+                total_venta = round(total_venta, 2)
+
+            # Mostrar el total de la venta en la etiqueta
+            lbl_total_venta.configure(text="A pagar:\n${}".format(total_venta))
+
+    def actualizar_detalle_seleccionado(self, detalles_treeview, entry_precio, entry_cantidad):
+        selected_item = detalles_treeview.focus()
+
+        if selected_item:
+            # Obtener los valores del producto seleccionado
+            values = detalles_treeview.item(selected_item)['values']
+            producto = values[0]
+            cantidad = values[1]
+            precio = values[2]
+
+            # Llenar los Entry con los valores del producto seleccionado
+            entry_cantidad.delete(0, 'end')
+            entry_precio.delete(0, 'end')
+
+            entry_cantidad.insert(0, cantidad)
+            entry_precio.insert(0, precio)
+
+    def editar_detalle_seleccionado(self, detalles_treeview, lbl_total_venta, entry_precio, entry_cantidad):
+        selected_item = detalles_treeview.focus()
+
+        if selected_item:
+            # Obtener los valores del producto seleccionado
+            values = detalles_treeview.item(selected_item)['values']
+            producto = values[0]
+
+            # Actualizar los valores del producto en el Treeview
+            detalles_treeview.item(selected_item, values=(producto, entry_cantidad.get(), entry_precio.get(), float(entry_cantidad.get()) * float(entry_precio.get())))
+
+            # Inicializar el total de la venta
+            total_venta = 0
+
+            # Obtener todas las filas del Treeview
+            filas = detalles_treeview.get_children()
+
+            # Iterar sobre todas las filas y sumar los subtotales
+            for fila in filas:
+                subtotal = float(detalles_treeview.item(fila, 'values')[-1])
+                total_venta += subtotal
+                total_venta = round(total_venta, 2)
+
+            # Mostrar el total de la venta en la etiqueta
+            lbl_total_venta.configure(text="A pagar:\n${}".format(total_venta))
+    
+    def deselect_item(self,event,lbl_pro_sel,lbl_pro_descripcion,treeview,entry_precio_venta,entry_cantidad,entry_busqueda_producto,lbl_subtotal_venta):
+        treeview.selection_remove(treeview.selection())
+        lbl_pro_sel.delete(1.0, tk.END)
+        lbl_pro_sel.insert(tk.END,"NOMBRE")
+        lbl_pro_descripcion.delete(1.0, tk.END)
+        lbl_pro_descripcion.insert(tk.END, "DESCRIPCION")
+        entry_precio_venta.delete(0, tk.END)
+        entry_precio_venta._activate_placeholder()  
+        entry_cantidad.delete(0, tk.END)
+        entry_cantidad._activate_placeholder()  
+        entry_busqueda_producto.delete(0, tk.END)
+        entry_busqueda_producto._activate_placeholder()
+        lbl_subtotal_venta.configure(text="subtotal\n$")
+
+    def restablecer_valores(self, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
+                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
+                        detalles_treeview, entry_precio_producto_detalle,entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta):
+        # Restablecer valores de Entry
+
+        entry_busqueda_producto.delete(0, tk.END)
+        entry_precio_venta.delete(0, tk.END)
+        entry_cantidad.delete(0, tk.END)
+        entry_cantidad._activate_placeholder()
         
+        entry_precio_producto_detalle.delete(0, tk.END)
+        entry_cantidad_producto_detalle.delete(0, tk.END)
+        entry_precio_producto_detalle._activate_placeholder()
+        entry_cantidad_producto_detalle._activate_placeholder()
+        # Restablecer valores 
+        lbl_pro_sel.delete(1.0, tk.END)
+        lbl_pro_sel.insert(tk.END,"NOMBRE")
+        lbl_pro_descripcion.delete(1.0, tk.END)
+        lbl_pro_descripcion.insert(tk.END, "DESCRIPCION")
+        lbl_subtotal_venta.configure(text="subtotal\n$")
         
-        pass
+        treeview.selection_remove(treeview.selection())    
+
+        # Restablecer valores de Treeview de detalles
+        detalles_treeview.delete(*detalles_treeview.get_children())
+        entry_busqueda_producto._activate_placeholder()
+        entry_precio_venta._activate_placeholder()
+        # Restablecer valores de lbl_total_venta
+        lbl_total_venta.configure(text="A pagar:\n$")  # Puedes establecer otro valor por defecto si es necesario
+        entry_nombre_producto_noinv._activate_placeholder()
+
+    def on_treeview_select(self, event, detalles_treeview, entry_precio_producto_detalle, entry_cantidad_producto_detalle, lbl_pro_sel, lbl_pro_descripcion, treeview,
+                        entry_precio_venta, entry_cantidad, entry_busqueda_producto, lbl_subtotal_venta):
+        # Primera función: actualizar campos de entrada
+        self.actualizar_campos_entrada(detalles_treeview, entry_precio_producto_detalle, entry_cantidad_producto_detalle)
+
+        # Segunda función: deseleccionar item y actualizar campos relacionados
+        self.deselect_item(event, lbl_pro_sel, lbl_pro_descripcion, treeview,
+                            entry_precio_venta, entry_cantidad, entry_busqueda_producto, lbl_subtotal_venta)
 
 
+""""
 
 #------------------------FUNCIONES PARA CLIENTE-------------------------------
 
@@ -1022,37 +1350,37 @@ class FormularioMaestroDesing(tk.Tk):
         frame_formulario_cliente = tk.Frame(self.cuerpo_principal,bg=COLOR_CUERPO_PRINCIPAL)
         frame_formulario_cliente.pack(pady=10, side="left")
 
-        lbl_titulo = CTkLabel(frame_formulario_cliente, text="Ingreso de Clientes", font=("OCR A Extended", 16, "bold"))
+        lbl_titulo = CTkLabel(frame_formulario_cliente, text="Ingreso de Clientes", font=("OCR A Extended", 12, "bold"))
         lbl_titulo.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
 
-        lbl_id = CTkLabel(frame_formulario_cliente, text="id:",font=("OCR A Extended", 13, "bold"))
+        lbl_id = CTkLabel(frame_formulario_cliente, text="id:",font=("OCR A Extended", 10, "bold"))
         lbl_id.grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        entry_id = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_id = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_id.grid(row=2, column=1, padx=5, pady=5)
     
-        lbl_cedula = CTkLabel(frame_formulario_cliente, text="Cédula:",font=("OCR A Extended", 13, "bold"))
+        lbl_cedula = CTkLabel(frame_formulario_cliente, text="Cédula:",font=("OCR A Extended", 10, "bold"))
         lbl_cedula.grid(row=3, column=0, padx=5, pady=5, sticky="w")
-        entry_cedula = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_cedula = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_cedula.grid(row=3, column=1, padx=5, pady=5)
 
-        lbl_nombre = CTkLabel(frame_formulario_cliente, text="Nombre:",font=("OCR A Extended", 13, "bold"))
+        lbl_nombre = CTkLabel(frame_formulario_cliente, text="Nombre:",font=("OCR A Extended", 10, "bold"))
         lbl_nombre.grid(row=4, column=0, padx=5, pady=5, sticky="w")
-        entry_nombre = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_nombre = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_nombre.grid(row=4, column=1, padx=5, pady=5)
 
-        lbl_telefono = CTkLabel(frame_formulario_cliente, text="Teléfono:",font=("OCR A Extended", 13, "bold"))
+        lbl_telefono = CTkLabel(frame_formulario_cliente, text="Teléfono:",font=("OCR A Extended", 10, "bold"))
         lbl_telefono.grid(row=5, column=0, padx=5, pady=5, sticky="w")
-        entry_telefono = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_telefono = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_telefono.grid(row=5, column=1, padx=5, pady=5)
 
-        lbl_direccion = CTkLabel(frame_formulario_cliente, text="Dirección:",font=("OCR A Extended", 13, "bold"))
+        lbl_direccion = CTkLabel(frame_formulario_cliente, text="Dirección:",font=("OCR A Extended", 10, "bold"))
         lbl_direccion.grid(row=6, column=0, padx=5, pady=5, sticky="w")
-        entry_direccion = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_direccion = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_direccion.grid(row=6, column=1, padx=5, pady=5)
 
-        lbl_email = CTkLabel(frame_formulario_cliente, text="Email:",font=("OCR A Extended", 13, "bold"))
+        lbl_email = CTkLabel(frame_formulario_cliente, text="Email:",font=("OCR A Extended", 10, "bold"))
         lbl_email.grid(row=7, column=0, padx=5, pady=5, sticky="w")
-        entry_email = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 13, "bold"))
+        entry_email = CTkEntry(frame_formulario_cliente,font=("OCR A Extended", 10, "bold"))
         entry_email.grid(row=7, column=1, padx=5, pady=5)
 
         btn_guardar = CTkButton(frame_formulario_cliente, text="Guardar",**ESTILO_CTKBOTONES)
@@ -1210,7 +1538,7 @@ class FormularioMaestroDesing(tk.Tk):
         mostrar_datos_actuales()
    
 
-
+"""
 
 
 
