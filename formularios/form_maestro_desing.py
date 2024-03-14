@@ -9,11 +9,14 @@ import uuid
 from customtkinter import *
 from tkinter import messagebox
 import openpyxl
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import scrolledtext
-from datetime import datetime
 import random
 import string
+from tkcalendar import Calendar
+import customtkinter as ctk
+
+
 
 
 
@@ -80,7 +83,7 @@ class FormularioMaestroDesing(tk.Tk):
 
         self.buttonInventario = tk.Button(self.menu_lateral,command=self.Inventario) 
         self.buttonIngresoVentas = tk.Button(self.menu_lateral,command=self.ventas) 
-        self.buttonHistorialVentas = tk.Button(self.menu_lateral) 
+        self.buttonHistorialVentas = tk.Button(self.menu_lateral,command=self.historial_ventas_calendario) 
        # self.buttonProveedores= tk.Button(self.menu_lateral) 
        # self.buttonClientes = tk.Button(self.menu_lateral,command=self.mostrar_clientes)  
        # self.buttonDatosNegocio = tk.Button(self.menu_lateral,command=self.datos_negocio)
@@ -875,7 +878,14 @@ class FormularioMaestroDesing(tk.Tk):
         treeview.heading('#6', text='Codigo Barras')
 
         treeview.grid(column=0, row=1, columnspan=1)
-                    
+
+        treeview.bind('<KeyPress>', lambda event: self.move_selection_filtrado(event, treeview,entry_cantidad))
+
+        # Vincular la función de actualización del precio al evento de selección en el Treeview
+        treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, 
+                                                                                       entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion,entry_id_producto))
+
+
        # Fondo deseado
         fondo = "#F9F9FA"
 
@@ -901,11 +911,11 @@ class FormularioMaestroDesing(tk.Tk):
         
         descripcion = 0
 
-        entry_precio_venta = CTkEntry(filtrado_productos_venta, placeholder_text="PRECIO $", width=90, height=70, font=("OCR A Extended", 14))
+        entry_precio_venta = CTkEntry(filtrado_productos_venta, placeholder_text="PRECIO $", width=90, height=70, font=("OCR A Extended", 20))
         entry_precio_venta.grid(column=4, row=1)#, sticky="w", padx=5, pady=5)
         entry_precio_venta.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
 
-        entry_cantidad = CTkEntry(filtrado_productos_venta, placeholder_text="CANTIDAD", width=90, height=70, font=("OCR A Extended", 14))
+        entry_cantidad = CTkEntry(filtrado_productos_venta, placeholder_text="\ue43c", width=90, height=70, font=("OCR A Extended", 20))
         entry_cantidad.grid(column=5, row=1)#, sticky='W', padx=5, pady=5)
 
         entry_cantidad.bind('<KeyRelease>', lambda event: self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta))
@@ -920,9 +930,7 @@ class FormularioMaestroDesing(tk.Tk):
                                          text_color='black', command=lambda: self.agregar_articulo(treeview, entry_cantidad, entry_precio_venta, entry_nombre_producto_noinv, detalles_treeview, lbl_total_venta))
         btn_agregar_articulo.grid(column=6, row=0,sticky='nwse', padx=10, pady=10)
 
-        # Vincular la función de actualización del precio al evento de selección en el Treeview
-        treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, 
-                                                                                       entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion,entry_id_producto))
+        
 
         # Actualizar el filtrado para mostrar todos los productos inicialmente
         self.actualizar_filtrado(None, entry_busqueda_producto, treeview, lbl_pro_sel,lbl_pro_descripcion,entry_id_producto)
@@ -957,8 +965,9 @@ class FormularioMaestroDesing(tk.Tk):
 
         detalles_treeview.grid(column=0, row=0, columnspan=1, padx=10, pady=10, sticky='nsew')
         id_det=0
+        detalles_treeview.bind('<KeyPress>', lambda event: self.move_selection_detalles(event, detalles_treeview))
         detalles_treeview.bind("<<TreeviewSelect>>", lambda event: self.on_treeview_select(event, detalles_treeview, id_det, entry_id_producto_detalle, entry_precio_producto_detalle, entry_cantidad_producto_detalle, lbl_pro_sel, lbl_pro_descripcion, treeview, entry_precio_venta, entry_cantidad, entry_busqueda_producto, lbl_subtotal_venta))
-        
+
         lbl_precio_producto_detalle =CTkLabel(detalles_acciones,text="PRECIO",font=("OCR A Extended",15))
         lbl_precio_producto_detalle.grid(column=2,row=0,padx=10,pady=10)
 
@@ -982,7 +991,7 @@ class FormularioMaestroDesing(tk.Tk):
                                        width=70, height=50, text_color='black', 
                                        font=("OCR A Extended", 12))
         boton_editar_detalle_venta.grid(column=3, row=2, padx=10, pady=10)
-        producto=0
+       
         boton_editar_detalle_venta.configure(command=lambda: self.editar_detalle_venta(detalles_treeview, entry_id_producto_detalle, 
                                                                                        entry_precio_producto_detalle, 
                                                                                        entry_cantidad_producto_detalle, lbl_total_venta))
@@ -1017,7 +1026,6 @@ class FormularioMaestroDesing(tk.Tk):
         boton_grabar_venta.grid(column=5, row=2,padx=5,pady=5)
         
         self.calcular_total_venta(detalles_treeview,lbl_total_venta)
-
 
     def calcular_total_venta(self,detalles_treeview,lbl_total_venta):
             # Obtener todas las filas del Treeview de detalles de venta
@@ -1080,12 +1088,12 @@ class FormularioMaestroDesing(tk.Tk):
             lbl_pro_descripcion.delete("1.0", tk.END)  # Limpiar el ScrolledText
             lbl_pro_descripcion.insert(tk.END, descripcion)  # Insertar la nueva descripción
 
-             # Hacer que el cursor caiga en el entry de cantidad
-            entry_cantidad.focus()
+           
 
             entry_cantidad.delete(0, tk.END)
             entry_cantidad.insert(0, "1")
             # Calcular el subtotal y actualizar la etiqueta
+            #self.move_selection_filtrado(event,treeview)
             self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta)
 
     def actualizar_filtrado(self, event, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion, entry_id_producto):
@@ -1190,6 +1198,7 @@ class FormularioMaestroDesing(tk.Tk):
 
                             # Calcular y mostrar el total de la venta
                             self.calcular_total_venta(detalles_treeview, lbl_total_venta)
+                            treeview.focus_set()
                         else:
                             # Mostrar un mensaje de error si el producto ya existe en detalles_treeview
                             messagebox.showerror("Error", "El producto ya existe en la lista de detalles, puedes editar ahí el precio y la cantidad a vender.")
@@ -1268,26 +1277,15 @@ class FormularioMaestroDesing(tk.Tk):
             # Mostrar un mensaje de error si no se seleccionó ninguna fila para editar
             messagebox.showerror("Error", "Por favor, seleccione una fila para editar en el Treeview de detalles.")
 
-
-   
-
-
-
-
-
-
-
-
-
     def boton_grabar_venta(self, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                        detalles_treeview, entry_precio_producto_detalle,
                        entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta):
         # Obtener la fecha y hora actual
         fecha_venta = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        #id_venta = self.generar_codigo_aleatorio()
-        id_cliente = self.generar_codigo_aleatorio()
         metodo_pago = "Contado"
+        id_cliente = self.generar_codigo_aleatorio()
+        cliente = "consumidor final"  # Aquí deberías obtener el cliente adecuado, por ejemplo, seleccionándolo de una lista
         
         # Conectar a la base de datos
         conn = sqlite3.connect('farmacia.db')
@@ -1300,6 +1298,7 @@ class FormularioMaestroDesing(tk.Tk):
                     id_producto TEXT,
                     producto TEXT,
                     id_cliente TEXT,
+                    cliente TEXT,
                     cantidad INTEGER,
                     precio_unitario REAL,
                     total REAL,
@@ -1320,19 +1319,48 @@ class FormularioMaestroDesing(tk.Tk):
                 cantidad = float(valores[3])  # Obtener la cantidad
                 precio_unitario = float(valores[2])
                 subtotal = float(valores[4])  # Obtener el subtotal
+                
+                # Consultar las existencias actuales del producto
+                cursor.execute("SELECT existencias FROM productos WHERE id = ?", (id_producto,))
+                existencias_actuales = cursor.fetchone()[0]
+                
+                # Verificar si hay suficientes existencias
+                if existencias_actuales < cantidad:
+                    messagebox.showerror("Error", f"No hay suficientes existencias para el producto {nombre_producto}.")
+                    conn.close()
+                    return
+                
+                # Calcular las nuevas existencias después de la venta
+                nuevas_existencias = existencias_actuales - cantidad
+
+                # Actualizar las existencias del producto en la base de datos
+                cursor.execute("UPDATE productos SET existencias = ? WHERE id = ?", (nuevas_existencias, id_producto))
 
                 # Insertar el detalle de venta en la tabla de ventas
                 cursor.execute('''
-                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cantidad, precio_unitario, total, metodo_pago, fecha_hora)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta))
+                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cliente, cantidad, precio_unitario, total, metodo_pago, fecha_hora)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta))
 
-            # Confirmar la transacción y cerrar la conexión
+            # Confirmar la transacción
             conn.commit()
-            conn.close()
-
+            
             # Limpiar el Treeview de detalles de venta después de grabar la venta
             detalles_treeview.delete(*filas)
+            
+            # Consultar nuevamente la base de datos para obtener los productos actualizados
+            cursor.execute("SELECT id, nombre, descripcion, precio_venta, existencias, codigo_barras FROM productos")
+            productos_actualizados = cursor.fetchall()
+
+            # Limpiar el Treeview
+            treeview.delete(*treeview.get_children())
+
+            # Insertar los datos actualizados en el Treeview
+            for producto in productos_actualizados:
+                treeview.insert('', 'end', values=producto)
+
+            # Cerrar la conexión a la base de datos
+            conn.close()
             
             # Restablecer valores
             self.restablecer_valores(entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
@@ -1349,13 +1377,6 @@ class FormularioMaestroDesing(tk.Tk):
 
             # Cerrar la conexión en caso de error
             conn.close()
-
-
-
-
-
-
-
 
     def generar_codigo_aleatorio(self):
         # Definir la longitud del código
@@ -1420,8 +1441,110 @@ class FormularioMaestroDesing(tk.Tk):
         
         # Deselect item and update related fields
         self.deselect_item(event, lbl_pro_sel, lbl_pro_descripcion, treeview, entry_precio_venta, entry_cantidad, entry_busqueda_producto, lbl_subtotal_venta)
-
     
+    def move_selection_detalles(self,event,detalles_treeview):
+        if event.keysym == 'Up':
+            detalles_treeview.focus_set()
+            detalles_treeview.selection_add(detalles_treeview.prev(detalles_treeview.selection()))
+        elif event.keysym == 'Down':
+            detalles_treeview.focus_set()
+            detalles_treeview.selection_add(detalles_treeview.next(detalles_treeview.selection()))
+     
+    def move_selection_filtrado(self, event, treeview, entry_cantidad):
+        if event.keysym == 'Up':
+            treeview.focus_set()
+            treeview.selection_add(treeview.prev(treeview.selection()))
+        elif event.keysym == 'Down':
+            treeview.focus_set()
+            treeview.selection_add(treeview.next(treeview.selection()))
+        elif event.keysym == 'Return':  # Verificar si se presionó Enter
+            entry_cantidad.focus()  # Hacer que el cursor caiga en el entry de cantidad
+
+
+#------------------FUNCIONES PARA EL HISTORIAL DE VENTAS ----------------------------------------------------
+            
+    def historial_ventas_calendario(self):
+        # Limpiar cualquier widget existente en el cuerpo principal
+        for widget in self.cuerpo_principal.winfo_children():
+            widget.destroy()
+        
+        frame_calendario = tk.Frame(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        frame_calendario.pack(fill="both", padx=10, pady=10, expand=True)
+      
+        cal = Calendar(frame_calendario, font=("OCR A Extended", 12),selectmode='day', locale='es_ES', disabledforeground="#858585",
+                    cursor="hand2", background="#2A3138",
+                    selectbackground="#3B8ED0")
+        cal.pack(fill="both", expand=True, padx=10, pady=10)
+        cal.bind("<<CalendarSelected>>", lambda event: self.on_date_click(event, treeview_historial_ventas, cal))
+
+        # Crear el estilo para el Treeview
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 9))
+        style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 10, 'bold'))
+           
+        treeview_historial_ventas = ttk.Treeview(frame_calendario, columns=("ID", "ID Producto", "Producto", "ID Cliente",
+                                                                            "Cliente","Cantidad", "Precio Unitario", "Total", 
+                                                                            "Método de Pago", "Fecha y Hora"), style="mystyle.Treeview",show="headings")
+        treeview_historial_ventas.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        treeview_historial_ventas.column("ID",width=0,stretch=FALSE)
+        treeview_historial_ventas.column("ID Producto",width=0,stretch=FALSE)
+        treeview_historial_ventas.column("ID Cliente", width=0,stretch=FALSE)
+        
+        treeview_historial_ventas.column("Producto",width=70)
+        treeview_historial_ventas.column("Cliente", width=70)
+        treeview_historial_ventas.column("Cantidad", width=10,anchor="center")
+        treeview_historial_ventas.column("Precio Unitario", width=10,anchor="center")
+        treeview_historial_ventas.column("Total", width=10,anchor="center")
+        treeview_historial_ventas.column("Método de Pago", width=70,anchor="center")
+        treeview_historial_ventas.column("Fecha y Hora", width=70)
+
+        # Configurar encabezados del Treeview
+        treeview_historial_ventas.heading("ID", text="ID")
+        treeview_historial_ventas.heading("ID Producto", text="ID Producto")
+        treeview_historial_ventas.heading("Producto", text="Producto")
+        treeview_historial_ventas.heading("ID Cliente", text="ID Cliente")
+        treeview_historial_ventas.heading("Cliente", text="Cliente")
+        treeview_historial_ventas.heading("Cantidad", text="Cantidad")
+        treeview_historial_ventas.heading("Precio Unitario", text="PvP")
+        treeview_historial_ventas.heading("Total", text="Total")
+        treeview_historial_ventas.heading("Método de Pago", text="Método Pago")
+        treeview_historial_ventas.heading("Fecha y Hora", text="Fecha Hora")
+
+        total_diario_ventas = CTkLabel(frame_calendario,text="TOTAL VENTAS DIARIAS: $")
+        total_diario_ventas.pack()
+
+
+
+    def on_date_click(self, event, treeview_historial_ventas, cal):
+        selected_date = cal.get_date()
+        try:
+            # Intentar convertir la fecha al formato esperado
+            start_date = datetime.strptime(selected_date, "%d/%m/%Y").date()
+        except ValueError:
+            # Si falla, intentar con un formato alternativo
+            start_date = datetime.strptime(selected_date, "%d/%m/%y").date()
+        
+        end_date = start_date + timedelta(days=1)  # Incrementar la fecha en un día para obtener el rango completo del día seleccionado
+        self.load_sales(start_date, end_date, treeview_historial_ventas)
+
+    def load_sales(self, start_date, end_date, treeview_historial_ventas):
+        # Limpiar cualquier venta existente en el Treeview
+        for item in treeview_historial_ventas.get_children():
+            treeview_historial_ventas.delete(item)
+
+        # Realizar consulta en la base de datos para obtener las ventas del día seleccionado
+        conn = sqlite3.connect('farmacia.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM ventas WHERE fecha_hora BETWEEN ? AND ?", (start_date, end_date))
+        sales = c.fetchall()
+        conn.close()
+
+        # Mostrar las ventas en el Treeview
+        for sale in sales:
+            treeview_historial_ventas.insert('', 'end', values=sale)
+        
+  
 
 """"
 
@@ -1692,6 +1815,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     id_producto TEXT,
                     producto TEXT,
                     id_cliente TEXT,
+                    cliente TEXT,
                     cantidad INTEGER,
                     precio_unitario REAL,
                     total REAL,
