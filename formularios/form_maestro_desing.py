@@ -830,7 +830,8 @@ class FormularioMaestroDesing(tk.Tk):
         boton_nueva_venta.grid(column=0, row=0, padx=10, pady=10)
         boton_nueva_venta.configure(command=lambda: self.restablecer_valores(entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                                                                      entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
-                                                                     detalles_treeview,entry_nombre_producto_noinv, entry_precio_producto_detalle, entry_cantidad_producto_detalle, lbl_total_venta))
+                                                                     detalles_treeview,entry_nombre_producto_noinv, entry_precio_producto_detalle, 
+                                                                     entry_cantidad_producto_detalle, lbl_total_venta,entry_valor_recibido,lbl_vuelto))
 
 
         inicio_caja = CTkButton(botones_accesos_rapidos, text="INICIO\nDE\nOPERACIONES",width=70, height=70, text_color='black',font=("OCR A Extended",12))
@@ -1022,10 +1023,68 @@ class FormularioMaestroDesing(tk.Tk):
                                        command=lambda: self.boton_grabar_venta(entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                        detalles_treeview, entry_precio_producto_detalle,
-                       entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta))
+                       entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta,entry_valor_recibido,lbl_vuelto))
         boton_grabar_venta.grid(column=5, row=2,padx=5,pady=5)
         
         self.calcular_total_venta(detalles_treeview,lbl_total_venta)
+
+        separador2 = ttk.Separator(detalles_acciones, orient="vertical")
+        separador2.grid(column=6, row=0,rowspan=3, sticky="ns",padx=5,pady=5)
+
+        lbl_valor_recibido = CTkLabel(detalles_acciones,text="Ingrese\nvalor\nrecibido:",width=70, height=50, text_color='black',
+                                       font=("OCR A Extended", 15))
+        lbl_valor_recibido.grid(column=7,row=0,padx=5,pady=5)
+
+        entry_valor_recibido = CTkEntry(detalles_acciones,placeholder_text="\uf53d",width=70, height=50, text_color='black',
+                                       font=("OCR A Extended", 15))
+        entry_valor_recibido.grid(column=7,row=1,padx=5,pady=5)
+        entry_valor_recibido.bind('<KeyRelease>', lambda event: self.calcular_vuelto(event,lbl_total_venta, entry_valor_recibido, lbl_vuelto))
+
+        lbl_vuelto = CTkLabel(detalles_acciones,text="No hay\nventa registrada.",width=70, height=50, text_color='black',
+                                       font=("OCR A Extended", 15))
+        lbl_vuelto.grid(column=7,row=2,padx=5,pady=5)
+        
+    def calcular_vuelto(self, event, lbl_total_venta, entry_valor_recibido, lbl_vuelto):
+        # Obtener el texto del total de la venta
+        total_venta_text = lbl_total_venta.cget("text")
+        
+        # Validar si el texto del total de la venta está vacío
+        if not total_venta_text:
+            lbl_vuelto.configure(text="No hay venta registrada.")
+            return
+        
+        # Obtener el valor numérico del total de la venta
+        try:
+            total_venta = float(total_venta_text.split("$")[-1])
+        except ValueError:
+            lbl_vuelto.configure(text="No hay\nventa registrada.")
+            return
+
+        # Obtener el valor recibido del Entry
+        valor_recibido_text = entry_valor_recibido.get()
+        if not valor_recibido_text:
+            lbl_vuelto.configure(text="No hay\nventa registrada.")
+            return
+
+        try:
+            # Obtener el valor recibido del Entry
+            valor_recibido = float(valor_recibido_text)
+
+            # Verificar si el valor recibido es mayor que el total de la venta
+            if valor_recibido < total_venta:
+                messagebox.showerror("Error", "El monto recibido debe ser mayor o igual al total de la venta.")
+                return
+
+            # Calcular el vuelto
+            vuelto = valor_recibido - total_venta
+
+            # Mostrar el vuelto en la etiqueta
+            lbl_vuelto.configure(text="Vuelto: ${:.2f}".format(vuelto))
+
+        except ValueError:
+            messagebox.showerror("Error", "Por favor, ingrese un monto válido.")
+
+ 
 
     def calcular_total_venta(self,detalles_treeview,lbl_total_venta):
             # Obtener todas las filas del Treeview de detalles de venta
@@ -1280,9 +1339,12 @@ class FormularioMaestroDesing(tk.Tk):
     def boton_grabar_venta(self, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                        detalles_treeview, entry_precio_producto_detalle,
-                       entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta):
+                       entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
+                       lbl_total_venta,entry_valor_recibido,lbl_vuelto):
+
         # Obtener la fecha y hora actual
-        fecha_venta = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        fecha_venta = datetime.now().strftime("%Y-%m-%d")
+        hora_venta = datetime.now().strftime("%H:%M:%S")
         metodo_pago = "Contado"
         id_cliente = self.generar_codigo_aleatorio()
         cliente = "consumidor final"  # Aquí deberías obtener el cliente adecuado, por ejemplo, seleccionándolo de una lista
@@ -1303,7 +1365,8 @@ class FormularioMaestroDesing(tk.Tk):
                     precio_unitario REAL,
                     total REAL,
                     metodo_pago TEXT,
-                    fecha_hora DATE,
+                    fecha DATE,
+                    hora TIME,
                     FOREIGN KEY (id_producto) REFERENCES productos (id)
                 )''')
 
@@ -1319,10 +1382,16 @@ class FormularioMaestroDesing(tk.Tk):
                 cantidad = float(valores[3])  # Obtener la cantidad
                 precio_unitario = float(valores[2])
                 subtotal = float(valores[4])  # Obtener el subtotal
-                
+                                    
                 # Consultar las existencias actuales del producto
                 cursor.execute("SELECT existencias FROM productos WHERE id = ?", (id_producto,))
-                existencias_actuales = cursor.fetchone()[0]
+                existencias_result = cursor.fetchone()
+                if existencias_result is None:
+                    respuesta = messagebox.askyesno("Producto no encontrado", f"El producto {nombre_producto} no está en el inventario. ¿Desea continuar con la venta?")
+                    if not respuesta:
+                        return  # Detener la función si el usuario elige no continuar
+                else:
+                    existencias_actuales = existencias_result[0]
                 
                 # Verificar si hay suficientes existencias
                 if existencias_actuales < cantidad:
@@ -1338,9 +1407,9 @@ class FormularioMaestroDesing(tk.Tk):
 
                 # Insertar el detalle de venta en la tabla de ventas
                 cursor.execute('''
-                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cliente, cantidad, precio_unitario, total, metodo_pago, fecha_hora)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta))
+                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cliente, cantidad, precio_unitario, total, metodo_pago, fecha, hora)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta, hora_venta))
 
             # Confirmar la transacción
             conn.commit()
@@ -1366,18 +1435,19 @@ class FormularioMaestroDesing(tk.Tk):
             self.restablecer_valores(entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                                 entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                                 detalles_treeview, entry_precio_producto_detalle,
-                                entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta)
+                                entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
+                                lbl_total_venta,entry_valor_recibido,lbl_vuelto)
 
             # Mostrar un mensaje de éxito
             messagebox.showinfo("Venta grabada", "La venta se ha grabado exitosamente en la base de datos.")
-
+            
         except sqlite3.Error as e:
             # Manejar cualquier error en la operación de la base de datos
             messagebox.showerror("Error", f"No se pudo grabar la venta en la base de datos.\nError: {e}")
 
             # Cerrar la conexión en caso de error
             conn.close()
-
+ 
     def generar_codigo_aleatorio(self):
         # Definir la longitud del código
         longitud = 8
@@ -1389,7 +1459,7 @@ class FormularioMaestroDesing(tk.Tk):
         codigo_aleatorio = ''.join(random.choice(caracteres) for _ in range(longitud))
 
         return codigo_aleatorio
-
+    
     def deselect_item(self,event,lbl_pro_sel,lbl_pro_descripcion,treeview,entry_precio_venta,entry_cantidad,entry_busqueda_producto,lbl_subtotal_venta):
         treeview.selection_remove(treeview.selection())
         lbl_pro_sel.delete(1.0, tk.END)
@@ -1406,13 +1476,18 @@ class FormularioMaestroDesing(tk.Tk):
 
     def restablecer_valores(self, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
                         entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
-                        detalles_treeview, entry_precio_producto_detalle,entry_nombre_producto_noinv, entry_cantidad_producto_detalle, lbl_total_venta):
+                        detalles_treeview, entry_precio_producto_detalle,entry_nombre_producto_noinv, 
+                        entry_cantidad_producto_detalle, lbl_total_venta,entry_valor_recibido,lbl_vuelto):
         # Restablecer valores de Entry
 
         entry_busqueda_producto.delete(0, tk.END)
         entry_precio_venta.delete(0, tk.END)
         entry_cantidad.delete(0, tk.END)
         entry_cantidad._activate_placeholder()
+        
+        lbl_vuelto.configure(text="No hay\nventa registrada.")
+        entry_valor_recibido.delete(0, tk.END)
+        entry_valor_recibido._activate_placeholder()
         
         entry_precio_producto_detalle.delete(0, tk.END)
         entry_cantidad_producto_detalle.delete(0, tk.END)
@@ -1468,36 +1543,37 @@ class FormularioMaestroDesing(tk.Tk):
         for widget in self.cuerpo_principal.winfo_children():
             widget.destroy()
         
-        frame_calendario = tk.Frame(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        frame_calendario = tk.Frame(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         frame_calendario.pack(fill="both", padx=10, pady=10, expand=True)
-      
-        cal = Calendar(frame_calendario, font=("OCR A Extended", 12),selectmode='day', locale='es_ES', disabledforeground="#858585",
+    
+        cal = Calendar(frame_calendario, font=("OCR A Extended", 12), selectmode='day', locale='es_ES', disabledforeground="#858585",
                     cursor="hand2", background="#2A3138",
                     selectbackground="#3B8ED0")
         cal.pack(fill="both", expand=True, padx=10, pady=10)
-        cal.bind("<<CalendarSelected>>", lambda event: self.on_date_click(event, treeview_historial_ventas, cal))
+        cal.bind("<<CalendarSelected>>", lambda event: self.on_date_click(event, treeview_historial_ventas, cal, total_diario_ventas))
 
         # Crear el estilo para el Treeview
         style = ttk.Style()
         style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 9))
         style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 10, 'bold'))
-           
+        
         treeview_historial_ventas = ttk.Treeview(frame_calendario, columns=("ID", "ID Producto", "Producto", "ID Cliente",
                                                                             "Cliente","Cantidad", "Precio Unitario", "Total", 
-                                                                            "Método de Pago", "Fecha y Hora"), style="mystyle.Treeview",show="headings")
+                                                                            "Método de Pago", "Fecha", "Hora"), style="mystyle.Treeview", show="headings")
         treeview_historial_ventas.pack(fill="both", expand=True, padx=10, pady=10)
         
-        treeview_historial_ventas.column("ID",width=0,stretch=FALSE)
-        treeview_historial_ventas.column("ID Producto",width=0,stretch=FALSE)
-        treeview_historial_ventas.column("ID Cliente", width=0,stretch=FALSE)
+        treeview_historial_ventas.column("ID", width=0, stretch=FALSE)
+        treeview_historial_ventas.column("ID Producto", width=0, stretch=FALSE)
+        treeview_historial_ventas.column("ID Cliente", width=0, stretch=FALSE)
         
-        treeview_historial_ventas.column("Producto",width=70)
+        treeview_historial_ventas.column("Producto", width=70)
         treeview_historial_ventas.column("Cliente", width=70)
-        treeview_historial_ventas.column("Cantidad", width=10,anchor="center")
-        treeview_historial_ventas.column("Precio Unitario", width=10,anchor="center")
-        treeview_historial_ventas.column("Total", width=10,anchor="center")
-        treeview_historial_ventas.column("Método de Pago", width=70,anchor="center")
-        treeview_historial_ventas.column("Fecha y Hora", width=70)
+        treeview_historial_ventas.column("Cantidad", width=10, anchor="center")
+        treeview_historial_ventas.column("Precio Unitario", width=10, anchor="center")
+        treeview_historial_ventas.column("Total", width=10, anchor="center")
+        treeview_historial_ventas.column("Método de Pago", width=70, anchor="center")
+        treeview_historial_ventas.column("Fecha", width=70)
+        treeview_historial_ventas.column("Hora", width=70)
 
         # Configurar encabezados del Treeview
         treeview_historial_ventas.heading("ID", text="ID")
@@ -1509,14 +1585,66 @@ class FormularioMaestroDesing(tk.Tk):
         treeview_historial_ventas.heading("Precio Unitario", text="PvP")
         treeview_historial_ventas.heading("Total", text="Total")
         treeview_historial_ventas.heading("Método de Pago", text="Método Pago")
-        treeview_historial_ventas.heading("Fecha y Hora", text="Fecha Hora")
+        treeview_historial_ventas.heading("Fecha", text="Fecha")
+        treeview_historial_ventas.heading("Hora", text="Hora")
 
-        total_diario_ventas = CTkLabel(frame_calendario,text="TOTAL VENTAS DIARIAS: $")
-        total_diario_ventas.pack()
+        total_diario_ventas = CTkLabel(frame_calendario, text="TOTAL VENTAS DIARIAS: $", width=70, height=50, font=("OCR A Extended", 25),
+                        anchor="center", bg_color=COLOR_CUERPO_PRINCIPAL, corner_radius=32)
+        total_diario_ventas.pack(side="right", padx=10, pady=10)
 
+        eliminar_registro = CTkButton(frame_calendario, text="Eliminar registro", width=70, height=50, text_color='black',
+                            font=("OCR A Extended", 12),
+                            command=lambda: self.borrar_registro(treeview_historial_ventas, total_diario_ventas))
+        eliminar_registro.pack(side="left", padx=10, pady=10)
 
+    def borrar_registro(self, treeview_historial_ventas, total_diario_ventas):
+        selected_item = treeview_historial_ventas.selection()
 
-    def on_date_click(self, event, treeview_historial_ventas, cal):
+        if selected_item:
+            # Obtener el ID de la venta seleccionada
+            venta_id = treeview_historial_ventas.item(selected_item, "values")[0]
+
+            # Conectar a la base de datos
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
+
+            try:
+                # Obtener las ventas eliminadas de la base de datos
+                cursor.execute("SELECT id_producto, cantidad FROM ventas WHERE id = ?", (venta_id,))
+                ventas_eliminadas = cursor.fetchall()
+
+                # Eliminar la venta de la base de datos
+                cursor.execute("DELETE FROM ventas WHERE id = ?", (venta_id,))
+                conn.commit()
+
+                # Actualizar existencias de productos
+                for venta in ventas_eliminadas:
+                    id_producto, cantidad_vendida = venta
+                    cursor.execute("UPDATE productos SET existencias = existencias + ? WHERE id = ?", (cantidad_vendida, id_producto))
+                    conn.commit()
+
+                # Cerrar la conexión a la base de datos
+                conn.close()
+
+                # Eliminar la fila seleccionada del treeview
+                treeview_historial_ventas.delete(selected_item)
+
+                # Obtener la fecha actual
+                current_date = datetime.now().date()
+
+                # Actualizar el total de ventas diarias
+                self.load_sales(current_date, current_date, treeview_historial_ventas, total_diario_ventas)
+
+            except sqlite3.Error as e:
+                # Manejar cualquier error en la operación de la base de datos
+                messagebox.showerror("Error", f"No se pudo eliminar la venta y actualizar el inventario.\nError: {e}")
+
+                # Cerrar la conexión en caso de error
+                conn.close()
+        else:
+            messagebox.showwarning("Seleccione una Venta", "Por favor, seleccione una venta para eliminar.")
+
+    def on_date_click(self, event, treeview_historial_ventas, cal, total_diario_ventas):
         selected_date = cal.get_date()
         try:
             # Intentar convertir la fecha al formato esperado
@@ -1526,9 +1654,9 @@ class FormularioMaestroDesing(tk.Tk):
             start_date = datetime.strptime(selected_date, "%d/%m/%y").date()
         
         end_date = start_date + timedelta(days=1)  # Incrementar la fecha en un día para obtener el rango completo del día seleccionado
-        self.load_sales(start_date, end_date, treeview_historial_ventas)
+        self.load_sales(start_date, end_date, treeview_historial_ventas, total_diario_ventas)
 
-    def load_sales(self, start_date, end_date, treeview_historial_ventas):
+    def load_sales(self, start_date, end_date, treeview_historial_ventas, total_diario_ventas):
         # Limpiar cualquier venta existente en el Treeview
         for item in treeview_historial_ventas.get_children():
             treeview_historial_ventas.delete(item)
@@ -1536,15 +1664,22 @@ class FormularioMaestroDesing(tk.Tk):
         # Realizar consulta en la base de datos para obtener las ventas del día seleccionado
         conn = sqlite3.connect('farmacia.db')
         c = conn.cursor()
-        c.execute("SELECT * FROM ventas WHERE fecha_hora BETWEEN ? AND ?", (start_date, end_date))
+        c.execute("SELECT * FROM ventas WHERE fecha BETWEEN ? AND ?", (start_date, end_date))
         sales = c.fetchall()
+        
+        # Calcular el total de las ventas diarias
+        total_ventas_diarias = sum(sale[7] for sale in sales)  # Se asume que el total de la venta está en la posición 7
+
+        # Actualizar el texto del label con el total de las ventas diarias
+        total_diario_ventas.configure(text=f"TOTAL VENTAS DIARIAS: ${total_ventas_diarias:.2f}")
+        
         conn.close()
 
         # Mostrar las ventas en el Treeview
         for sale in sales:
             treeview_historial_ventas.insert('', 'end', values=sale)
-        
-  
+
+
 
 """"
 
@@ -1820,7 +1955,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     precio_unitario REAL,
                     total REAL,
                     metodo_pago TEXT,
-                    fecha_hora DATE,
+                    fecha DATE,
+                    hora TIME,
                     FOREIGN KEY (id_producto) REFERENCES productos (id)
                 )''')
 
