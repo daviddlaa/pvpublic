@@ -14,8 +14,8 @@ from tkinter import scrolledtext
 import random
 import string
 from tkcalendar import Calendar
-import customtkinter as ctk
-
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 
@@ -136,116 +136,101 @@ class FormularioMaestroDesing(tk.Tk):
     
     def Inventario(self):
        
-
         # Limpiar cualquier widget existente en el cuerpo principal
         for widget in self.cuerpo_principal.winfo_children():
             widget.destroy()
           # Definir el estilo general para los botones
         
         ESTILO_CTKBOTONES_DATOS_INVENTARIO = {
-            'width': 30,
+            'width': 50,
             'height': 30,
             'text_color': 'black',
-            'font': ("OCR A Extended", 12)
+            'font': ("OCR A Extended", 13)
         }
-
         ESTILO_TITULO_LABEL_DATOS_INVENTARIO = {
-            'text_color': 'black',
-            'font': ("OCR A Extended", 15, "bold"),  
+            
+            'font': ("OCR A Extended", 14),  
         }
-
         ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO = {
             'text_color': 'black',
             'font': ("OCR A Extended", 14),
                
         }
-        
         ALINEACION_FORMULARIO = {
         'padx': 5,
         'pady': 5,
         'sticky': 'w'
         }
-#Creando la ventana de D
-            
+    
         # Crear un formulario para agregar nuevos elementos al inventario
-        formulario_inventario = tk.Frame(self.cuerpo_principal, bg=COLOR_CUERPO_PRINCIPAL)
-        formulario_inventario.pack(padx=20, pady=20, fill='both', expand=True)
+        formulario_inventario = tk.LabelFrame(self.cuerpo_principal,text="FORMULARIO DE PRODUCTOS: " ,bg=COLOR_CUERPO_PRINCIPAL,**ESTILO_TITULO_LABEL_DATOS_INVENTARIO)
+        formulario_inventario.pack(padx=10, pady=(10,0), fill='x', expand=True)
 
-        # Etiquetas y campos de entrada para el formulario_inventario
-        CTkLabel(formulario_inventario,text="INGRESO DE PRODUCTOS",**ESTILO_TITULO_LABEL_DATOS_INVENTARIO).grid(row=0,column=0,sticky="ns",padx=5,pady=5,columnspan=2)
-
-        #dentry para id OCULTO
-        id_producto_entry = tk.Entry(formulario_inventario,)
-        id_producto_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        # Entry oculto para el ID
+        id_producto_entry = tk.Entry(formulario_inventario) 
+        id_producto_entry.grid(row=0, column=5)
         id_producto_entry.grid_remove()
-      
-        CTkLabel(formulario_inventario, text="Nombre:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=2, column=0,**ALINEACION_FORMULARIO)
-        nombre_producto_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        nombre_producto_entry.grid(row=2, column=1,**ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Descripción:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=3, column=0,**ALINEACION_FORMULARIO)
-        descripcion_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        descripcion_entry.grid(row=3, column=1,**ALINEACION_FORMULARIO)
+        # Nombre
+        CTkLabel(formulario_inventario, text="Nombre:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=1, column=0, **ALINEACION_FORMULARIO)
+        nombre_producto_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        nombre_producto_entry.grid(row=1, column=1, **ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Precio venta:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=4, column=0,**ALINEACION_FORMULARIO)
-        precio_venta_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        precio_venta_entry.grid(row=4, column=1,**ALINEACION_FORMULARIO)
+        # Descripción
+        CTkLabel(formulario_inventario, text="Descripción:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=1, column=2, **ALINEACION_FORMULARIO)
+        descripcion_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        descripcion_entry.grid(row=1, column=3, **ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Precio compra:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=5, column=0,**ALINEACION_FORMULARIO)
-        precio_compra_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        precio_compra_entry.grid(row=5, column=1,**ALINEACION_FORMULARIO)
+        # Categoría
+        CTkLabel(formulario_inventario, text="Categoría:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=1, column=4, **ALINEACION_FORMULARIO)
+        categoria_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        categoria_entry.grid(row=1, column=5, **ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Existencias:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=6, column=0,**ALINEACION_FORMULARIO)
-        existencias_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        existencias_entry.grid(row=6, column=1,**ALINEACION_FORMULARIO)
+        # Precio venta
+        CTkLabel(formulario_inventario, text="Precio venta:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=2, column=0, **ALINEACION_FORMULARIO)
+        precio_venta_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        precio_venta_entry.grid(row=2, column=1, **ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Stock Min:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=7, column=0,**ALINEACION_FORMULARIO)
-        stock_minimo_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        stock_minimo_entry.grid(row=7, column=1,**ALINEACION_FORMULARIO)
+        # Precio compra
+        CTkLabel(formulario_inventario, text="Precio compra:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=2, column=2, **ALINEACION_FORMULARIO)
+        precio_compra_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        precio_compra_entry.grid(row=2, column=3, **ALINEACION_FORMULARIO)
 
-        CTkLabel(formulario_inventario, text="Codigo de barras:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=8, column=0,**ALINEACION_FORMULARIO)
-        codigo_barras_entry = CTkEntry(formulario_inventario,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        codigo_barras_entry.grid(row=8, column=1,**ALINEACION_FORMULARIO)
+        # Existencias
+        CTkLabel(formulario_inventario, text="Existencias:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=2, column=4, **ALINEACION_FORMULARIO)
+        existencias_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        existencias_entry.grid(row=2, column=5, **ALINEACION_FORMULARIO)
 
-        # Actualizar la descripción al principio
-    
+        # Stock Mínimo
+        CTkLabel(formulario_inventario, text="Stock Mín:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=3, column=0, **ALINEACION_FORMULARIO)
+        stock_minimo_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        stock_minimo_entry.grid(row=3, column=1, **ALINEACION_FORMULARIO)
+
+        # Código de barras
+        CTkLabel(formulario_inventario, text="Código de barras:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO).grid(row=3, column=2, **ALINEACION_FORMULARIO)
+        codigo_barras_entry = CTkEntry(formulario_inventario, **ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
+        codigo_barras_entry.grid(row=3, column=3, **ALINEACION_FORMULARIO)
+
       # Botón para agregar el producto al inventario
-        agregar_button = CTkButton(formulario_inventario, text="\uf055 Agregar\nProducto", 
-                                    command=lambda: self.agregar_producto(tree_inventario, nombre_producto_entry, descripcion_entry, 
-                                                                        precio_venta_entry, precio_compra_entry, existencias_entry, 
-                                                                        stock_minimo_entry, codigo_barras_entry, id_producto_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        agregar_button.grid(row=9, column=1, padx=5, pady=5)
+        agregar_button = CTkButton(formulario_inventario, text="\uf055 Agregar\nProducto",**ESTILO_CTKBOTONES_DATOS_INVENTARIO,
+                                   command=lambda:self.agregar_producto(tree_inventario, nombre_producto_entry, descripcion_entry, categoria_entry, precio_venta_entry, 
+                         precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry,descripcion_pro_inventario))
+        agregar_button.grid(row=1, column=6,**ALINEACION_FORMULARIO)
 
-        # Botón para limpiar el formulario
-    
-        limpiar_formulario_button = CTkButton(formulario_inventario, text="\uf1b8 Limpiar\nformulario", 
-                                              command=lambda: self.limpiar_formulario(id_producto_entry,nombre_producto_entry,descripcion_entry,
-                                                                                      precio_venta_entry,precio_compra_entry,existencias_entry,
-                                                                                      stock_minimo_entry,codigo_barras_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        limpiar_formulario_button.grid(row=9, column=0, padx=5, pady=5)
-
-        # Crear y empaquetar el label para la descripción del producto
-        self.descripcion_info_producto = tk.Label(formulario_inventario,font = ("OCR A Extended", 13),wraplength=300,background=COLOR_CUERPO_PRINCIPAL,justify="left")
-        self.descripcion_info_producto.place(relx=0.5, rely=0.3, anchor='nw')
-
-        # Crear y empaquetar el label para la notificación de existencias bajas
-        self.notificacion_existencias_bajas = tk.Label(formulario_inventario,font = ("OCR A Extended", 14), fg="red", background=COLOR_CUERPO_PRINCIPAL,wraplength=300)
-
-        self.lbl_buscar = CTkLabel(formulario_inventario,text="Buscar producto:",**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO)
-        self.lbl_buscar.place(relx=0.60, rely=0.85, anchor='e')
-
-        self.entry_buscar = CTkEntry(formulario_inventario,height=30,width=150,**ESTILO_ENTRYS_LABEL_DATOS_INVENTARIO,placeholder_text="\uf3eb")
-        self.entry_buscar.place(relx=0.80, rely=0.85, anchor='e')
-
-        self.entry_buscar.bind("<KeyRelease>", lambda event: self.filtrar_productos(event, tree_inventario, self.entry_buscar))
+       
+        limpiar_formulario_button = CTkButton(formulario_inventario, text="\uf1b8 Limpiar\nformulario",**ESTILO_CTKBOTONES_DATOS_INVENTARIO,
+                                              command=lambda:self.limpiar_formulario(id_producto_entry,nombre_producto_entry,descripcion_entry,categoria_entry,precio_venta_entry,
+                           precio_compra_entry,existencias_entry,stock_minimo_entry,codigo_barras_entry,descripcion_pro_inventario))
+        limpiar_formulario_button.grid(row=2, column=6,**ALINEACION_FORMULARIO)
              
         # CREAR EL TREEVIEW -------------------------------------------------
-        treeview_frame = tk.Frame(self.cuerpo_principal)
-        treeview_frame.pack(padx=20, pady=20, fill='both', expand=True)
+        treeview_inventario_frame = tk.LabelFrame(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        treeview_inventario_frame.pack(padx=10, pady=10, fill='both', expand=True)
 
         # Configurar el Grid para que el frame se expanda con la ventana
-        treeview_frame.grid_rowconfigure(0, weight=1)
-        treeview_frame.grid_columnconfigure(0, weight=1)
+        treeview_inventario_frame.grid_rowconfigure(0, weight=1)
+        treeview_inventario_frame.grid_columnconfigure(0, weight=1)
 
         # Configurar el estilo
         style = ttk.Style()
@@ -254,111 +239,127 @@ class FormularioMaestroDesing(tk.Tk):
         style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])  # Remove the borders
 
         # Crear el TreeView con el estilo configurado y limitar el número máximo de filas
-        tree_inventario = ttk.Treeview(treeview_frame, style="mystyle.Treeview", 
-                                        columns=("id","Nombre", "Descripción", "Precio Venta", "Precio Compra", "Existencias", "Stock Mínimo", "Código Barras"), 
+        tree_inventario = ttk.Treeview(treeview_inventario_frame, style="mystyle.Treeview", 
+                                        columns=("id","Nombre", "Descripción","Categoria", "Precio Venta", "Precio Compra", "Existencias", "Stock Mínimo", "Código Barras"), 
                                         show="headings")
 
         tree_inventario.heading("id", text="ID")
         tree_inventario.heading("Nombre", text="NOMBRE")
         tree_inventario.heading("Descripción", text="DESCRIPCION")
+        tree_inventario.heading("Categoria", text="CATEGORIA")
         tree_inventario.heading("Precio Venta", text="PVP")
         tree_inventario.heading("Precio Compra", text="P. COMPRA")
         tree_inventario.heading("Existencias", text="EXISTENCIAS")
         tree_inventario.heading("Stock Mínimo", text="STOCK MIN")
         tree_inventario.heading("Código Barras", text="COD BARRAS")
-        
-        # Asociar la función de actualización al evento de selección en el TreeView
-        tree_inventario.bind("<<TreeviewSelect>>", lambda event: self.actualizar_descripcion(event, tree_inventario))  
-
-        # Agregar un Scrollbar para el TreeView
-        scrollbar = CTkScrollbar(treeview_frame, command=tree_inventario.yview)
-        scrollbar.grid(row=0, column=1, sticky='ns')
-        tree_inventario.configure(yscrollcommand=scrollbar.set)
 
         # Ajustar el ancho de las columnas al cambiar el tamaño de la ventana
-        for col in ("Nombre", "Descripción", "Precio Venta", "Precio Compra", "Existencias", "Stock Mínimo", "Código Barras"):
-            tree_inventario.column(col, width=60, anchor="center")  # Ajusta el ancho según sea necesario
-            tree_inventario.column("id", width=0, stretch=tk.NO) #OCULTAR LA COLUMNA ID
+        for col in ("Nombre","Descripción","Categoria","Precio Venta", "Precio Compra", "Existencias", "Stock Mínimo", "Código Barras"):
+            tree_inventario.column(col, width=60, anchor="center") 
+            tree_inventario.column("id", width=0, stretch=tk.NO) 
+      
+        tree_inventario.grid(row=1, column=0, sticky="nsew")
+        tree_inventario.bind('<ButtonRelease-1>', lambda event: self.actualizar_descripcion(event, tree_inventario,descripcion_pro_inventario))
+        self.actualizar_treeview(tree_inventario)
+         
+        scrollbar = CTkScrollbar(treeview_inventario_frame, command=tree_inventario.yview)
+        scrollbar.grid(row=1, column=1)
+        tree_inventario.configure(yscrollcommand=scrollbar.set)
 
-        # Configurar el Grid para que el TreeView se expanda con el frame
-        tree_inventario.grid(row=0, column=0, sticky="nsew")
+        entry_buscar = CTkEntry(treeview_inventario_frame,placeholder_text="\uf3eb BUSCAR POR NOMBRE, DESCRIPCION, CATEGORIA O COD BARRAS",width=500,**ESTILO_TITULO_LABEL_DATOS_INVENTARIO)
+        entry_buscar.grid(row=0, column=0,pady=(10,0),columnspan=3)
+        entry_buscar.bind("<KeyRelease>", lambda event: self.filtrar_productos(event, tree_inventario,entry_buscar))
 
-        # Obtener datos de productos de la base de datos
-        conn = sqlite3.connect('farmacia.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM productos")
-        productos = cursor.fetchall()
-        conn.close()
+        descripcion_pro_inventario = scrolledtext.ScrolledText(treeview_inventario_frame, wrap="word", width=20, height=12, font=('OCR A Extended', 13))
+        descripcion_pro_inventario.grid(column=2, row=1, padx=(0, 10), pady=10, sticky='w')
+        descripcion_pro_inventario.config(bg=COLOR_CUERPO_PRINCIPAL)  
+
+        buttons_frame = tk.LabelFrame(self.cuerpo_principal,text="ACCIONES PARA EL INVENTARIO: ",background=COLOR_CUERPO_PRINCIPAL,**ESTILO_TITULO_LABEL_DATOS_INVENTARIO)
+        buttons_frame.pack(side="left",padx=10, pady=10)
+
+        editar_button = CTkButton(buttons_frame, text="\uf044"" Editar",**ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=lambda: self.editar_producto(tree_inventario, 
+                        nombre_producto_entry, descripcion_entry, categoria_entry,
+                        precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry))
+        editar_button.grid(column=0,row=0,**ALINEACION_FORMULARIO)
         
+        eliminar_button = CTkButton(buttons_frame, text="\uf056"" Eliminar", **ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=lambda: self.eliminar_producto(tree_inventario))
+        eliminar_button.grid(column=1, row=0,**ALINEACION_FORMULARIO)
+
+        cargar_button = CTkButton(buttons_frame, text="\uf093"" Cargar\nExcel", **ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=lambda: self.cargar_excel(tree_inventario))
+        cargar_button.grid(column=2, row=0,**ALINEACION_FORMULARIO)
+
+        descargar_button = CTkButton(buttons_frame, text="\uf019 Respaldo", **ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=self.descargar_productos_excel)
+        descargar_button.grid(column=3, row=0,**ALINEACION_FORMULARIO)
+
+        frame_alerta = tk.LabelFrame(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        frame_alerta.pack(side="right",padx=10, pady=10)
+
+          # Crear la etiqueta para la notificación de existencias bajas
+        notificacion_existencias_bajas = CTkLabel(frame_alerta,text="", **ESTILO_TITULO_LABEL_DATOS_INVENTARIO,text_color="red") 
+        notificacion_existencias_bajas.grid(column=0,row=0,**ALINEACION_FORMULARIO)
+        self.verificar_existencias_bajas(tree_inventario, notificacion_existencias_bajas)
         
-        # Obtener la descripción seleccionada
-        descripcion_seleccionada = "Descripción seleccionada"
+        informe_stock_min_button = CTkButton(frame_alerta, text="\uf15b"" Informe\nStock\nmínimo", **ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=lambda:self.mostrar_informe_min_stock())
+        informe_stock_min_button.grid(column=1,row=0,**ALINEACION_FORMULARIO)
 
-        # Crear o actualizar la descripción
-        self.actualizar_descripcion(descripcion_seleccionada, tree_inventario)
-        self.notificar_existencias_bajas(productos)
-
-        buttons_frame = tk.Frame(treeview_frame,background=COLOR_CUERPO_PRINCIPAL)
-        buttons_frame.grid(row=0, column=2, sticky="ns")
-
-        # Crear los botones de editar y eliminar
-        editar_button = CTkButton(buttons_frame, text="\uf044"" Editar", 
-                                  command=lambda: self.editar_producto(tree_inventario, nombre_producto_entry, 
-                                                                       descripcion_entry, precio_venta_entry, precio_compra_entry, 
-                                                                       existencias_entry, stock_minimo_entry, codigo_barras_entry, 
-                                                                       id_producto_entry),**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        editar_button.pack(side="top", padx=5, pady=5)
-
-        eliminar_button = CTkButton(buttons_frame, text="\uf056"" Eliminar", command=lambda: self.eliminar_producto(tree_inventario)
-                                    ,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        eliminar_button.pack(side="top", padx=5, pady=5)
-
-        cargar_button = CTkButton(buttons_frame, text="\uf093"" Cargar\nExcel",command=lambda: self.cargar_excel(tree_inventario)
-                                  ,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        cargar_button.pack(side="top", padx=5, pady=5)
-
-        descargar_button = CTkButton(buttons_frame, text="\uf019 Respaldo", command=self.descargar_productos_excel,**ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        descargar_button.pack(side="top", padx=5, pady=5)
-
-        # Verificar si hay existencias mínimas en la lista de productos
-        existencias_minimas = any(producto[5] < producto[6] for producto in productos)
-
-        # Crear el botón con la opción de habilitarlo o deshabilitarlo según la condición
-        informe_stock_min_button = CTkButton(buttons_frame, text="\uf15b"" Informe\nStock\nminimo", command=lambda: self.mostrar_informe_min_stock(productos),
-                                             **ESTILO_CTKBOTONES_DATOS_INVENTARIO)
-        if existencias_minimas:
-            informe_stock_min_button.configure(state="normal")  # Habilitar el botón si hay existencias mínimas
-        else:
-            informe_stock_min_button.configure(state="disabled")  # Deshabilitar el botón si no hay existencias mínimas
-        informe_stock_min_button.pack(side="top", padx=5, pady=5)
-
-        for producto in productos:
-            self.agregar_producto_a_treeview(producto, tree_inventario)
-
-        self.actualizar_descripcion(None, tree_inventario)
-
-    def actualizar_descripcion(self, event, tree_inventario):
+    def verificar_existencias_bajas(self, tree_inventario, notificacion_existencias_bajas):
         try:
-            # Obtener el índice del item seleccionado en el TreeView
-            item_seleccionado = tree_inventario.focus()
-            
-            # Obtener los valores del item seleccionado
-            valores = tree_inventario.item(item_seleccionado, 'values')
-            
-            # Verificar si hay valores en la fila seleccionada
-            if valores:
-                # Obtener la descripción del producto
-                descripcion_producto = valores[2]  # Suponiendo que la descripción está en la segunda columna
-                # Actualizar el texto del label con la descripción del producto
-                self.descripcion_info_producto.config(text="Información General: " + descripcion_producto)
-            else:
-                # Si no hay valores en la fila seleccionada, mostrar un mensaje de error
-                self.descripcion_info_producto.config(text="Información General: Seleccione un producto para  ver su información.")
+            # Conectar a la base de datos
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
+            # Obtener los datos de productos
+            cursor.execute("SELECT existencias, stock_minimo FROM productos")
+            productos = cursor.fetchall()
+
+            # Verificar existencias bajas
+            existencias_bajas = [producto[0] < producto[1] for producto in productos]
+
+            # Si hay existencias bajas, mostrar notificación
+            if any(existencias_bajas):
+                notificacion_existencias_bajas.configure(text="¡Existen productos con existencias bajas!")
+            else:
+                notificacion_existencias_bajas.configure(text="")  # Limpiar la notificación si no hay existencias bajas
+
+        except sqlite3.Error as e:
+            # Manejar errores de la base de datos
+            messagebox.showerror("Error", f"Error de base de datos: {str(e)}")
+        except Exception as e:
+            # Manejar otros errores
+            messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
+        finally:
+            # Cerrar la conexión a la base de datos
+            if conn:
+                conn.close()
+                
+    def actualizar_treeview(self, tree_inventario):
+        try:
+            # Conectar a la base de datos
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
+
+            # Obtener los datos actualizados de productos de la base de datos
+            cursor.execute("SELECT * FROM productos")
+            productos = cursor.fetchall()
+
+            # Limpiar el TreeView antes de volver a cargar los datos
+            tree_inventario.delete(*tree_inventario.get_children())
+
+            # Insertar los nuevos datos en el TreeView
+            for producto in productos:
+                precio_venta = f"${producto[4]}"  # El índice 3 corresponde al precio de venta
+                precio_compra = f"${producto[5]}"  # El índice 4 corresponde al precio de compra
+                codigo_barras = producto[8]  # El índice 7 corresponde al código de barras
+                tree_inventario.insert("", "end", values=(producto[0], producto[1], producto[2], producto[3], precio_venta, precio_compra, producto[6], producto[7], codigo_barras))
+       
         except Exception as e:
             # Mostrar mensaje de error
-            messagebox.showerror("Error", f"Ha ocurrido un error al actualizar la descripción: {str(e)}")
-  
+            messagebox.showerror("Error", f"Ha ocurrido un error al actualizar el TreeView: {str(e)}")
+        finally:
+            # Cerrar la conexión a la base de datos
+            if conn:
+                conn.close()
+
     def filtrar_productos(self, event, tree_inventario, entry_buscar):
 
         # Obtener el texto ingresado en el Entry de búsqueda
@@ -378,110 +379,39 @@ class FormularioMaestroDesing(tk.Tk):
         for producto in productos:
             # Convertir todos los campos a minúsculas para una búsqueda sin distinción entre mayúsculas y minúsculas
             if any(texto_busqueda in str(valor).lower() for valor in producto):
-                precio_venta = f"${producto[3]}"  # El índice 3 corresponde al precio de venta
-                precio_compra = f"${producto[4]}"  # El índice 4 corresponde al precio de compra
-                tree_inventario.insert("", "end", text="", values=(producto[0],producto[1], producto[2], precio_venta, precio_compra, producto[5], producto[6], producto[7]))
+                precio_venta = f"${producto[4]}"  # El índice 3 corresponde al precio de venta
+                precio_compra = f"${producto[5]}"  # El índice 4 corresponde al precio de compra
+                tree_inventario.insert("", "end", text="", values=(producto[0],producto[1], producto[2],producto[3], precio_venta, precio_compra, producto[6], producto[7], producto[8]))
 
         # Cerrar la conexión a la base de datos
         conn.close()
 
-    def agregar_producto(self, tree_inventario, nombre_producto_entry, descripcion_entry, precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry):
+    def actualizar_descripcion(self, event, tree_inventario, descripcion_pro_inventario):
         try:
-            # Obtener los valores de los campos del formulario
-            nombre = nombre_producto_entry.get()
-            descripcion = descripcion_entry.get()
-            precio_venta = precio_venta_entry.get()
-            precio_compra = precio_compra_entry.get()
-            existencias = existencias_entry.get()
-            stock_minimo = stock_minimo_entry.get()
-            codigo_barras = codigo_barras_entry.get()
-            id_producto = id_producto_entry.get()
-
-            # Validar que no haya campos vacíos
-            if not all([nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras]):
-                messagebox.showerror("Error", "Todos los campos son obligatorios")
-                return
-
-            # Convertir los valores de precio y existencias a números
-            precio_venta = float(precio_venta.replace('$', ''))
-            precio_compra = float(precio_compra.replace('$', ''))
-            existencias = int(existencias)
-            stock_minimo = int(stock_minimo)
-
-            # Validar que los precios y existencias sean valores válidos
-            if precio_venta <= 0 or precio_compra <= 0 or existencias < 0 or stock_minimo < 0:
-                messagebox.showerror("Error", "Los precios y existencias deben ser mayores que cero, y las existencias no pueden ser negativas")
-                return
-
-            # Conectar a la base de datos
-            conn = sqlite3.connect('farmacia.db')
-            cursor = conn.cursor()
-
-            # Verificar si el código de barras ya existe en la base de datos
-            cursor.execute("SELECT * FROM productos WHERE codigo_barras=?", (codigo_barras,))
-            existing_product = cursor.fetchone()
-
-            # Verificar si ya existe un producto con el mismo código de barras, nombre, descripción y ID
-            if existing_product:
-                existing_nombre = existing_product[1]
-                existing_descripcion = existing_product[2]
-                existing_id = existing_product[0]
-                if existing_nombre == nombre and existing_descripcion == descripcion and existing_id == id_producto:
-                    # Permitir la edición si se modifican otros campos
-                    cursor.execute("UPDATE productos SET precio_venta=?, precio_compra=?, existencias=?, stock_minimo=? WHERE id=?",
-                                    (precio_venta, precio_compra, existencias, stock_minimo, id_producto))
-                    messagebox.showinfo("Éxito", "El producto se ha actualizado correctamente")
-                    conn.commit()
-                else:
-                    messagebox.showinfo("Info", "Ya existe un producto con el mismo código de barras, nombre y descripción en la base de datos")
-                    return
-
-            # Verificar si estamos editando un producto existente o agregando uno nuevo
-            if self.editando_producto_id:  # Si hay un ID de producto en modo de edición
-                # Actualizar los datos del producto existente
-                cursor.execute("UPDATE productos SET nombre=?, descripcion=?, precio_venta=?, precio_compra=?, existencias=?, stock_minimo=?, codigo_barras=? WHERE id=?",
-                                (nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras, self.editando_producto_id))
-                messagebox.showinfo("Éxito", "El producto se ha actualizado correctamente")
-                conn.commit()
+            # Obtener el índice del item seleccionado en el TreeView
+            item_seleccionado = tree_inventario.focus()
+            
+            # Obtener los valores del item seleccionado
+            valores = tree_inventario.item(item_seleccionado, 'values')
+            
+            # Verificar si hay valores en la fila seleccionada
+            if valores:
+                # Obtener la descripción del producto
+                descripcion_producto = valores[2]  
+                # Actualizar el texto del label con la descripción del producto
+                descripcion_pro_inventario.config(state=tk.NORMAL)  # Habilitar la edición del ScrolledText
+                descripcion_pro_inventario.delete('1.0', tk.END)  # Limpiar el contenido anterior
+                descripcion_pro_inventario.insert(tk.END, descripcion_producto)  # Insertar la nueva descripción
+                descripcion_pro_inventario.config(state=tk.DISABLED)  # Deshabilitar la edición del ScrolledText
             else:
-                # Generar un id único de 8 caracteres alfanuméricos
-                producto_id = str(uuid.uuid4())[:8]  # Obtiene los primeros 8 caracteres del id generado
-
-                # Insertar los datos en la tabla de productos
-                cursor.execute("INSERT INTO productos (id, nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                                (producto_id, nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras))
-                messagebox.showinfo("Éxito", "El producto se ha agregado correctamente")
-                conn.commit()
-
-            # Limpiar el TreeView antes de volver a cargar los datos
-            tree_inventario.delete(*tree_inventario.get_children())
-
-            # Obtener los datos actualizados de productos de la base de datos
-            cursor.execute("SELECT * FROM productos")
-            productos = cursor.fetchall()
-
-            for producto in productos:
-                precio_venta = f"${producto[3]}"  # El índice 3 corresponde al precio de venta
-                precio_compra = f"${producto[4]}"  # El índice 4 corresponde al precio de compra
-                tree_inventario.insert("", "end", values=(producto[0], producto[1], producto[2], precio_venta, precio_compra, producto[5], producto[6], producto[7]))
-
-        except ValueError:
-            # Mostrar mensaje de error si los campos de precio y existencias no son números válidos
-            messagebox.showerror("Error", "Los campos de precio y existencias deben ser números")
-        except sqlite3.Error as e:
-            # Mostrar mensaje de error específico de SQLite
-            messagebox.showerror("Error", f"Error de base de datos: {str(e)}")
+                # Si no hay valores en la fila seleccionada, mostrar un mensaje de error
+                descripcion_pro_inventario.config(state=tk.NORMAL)  # Habilitar la edición del ScrolledText
+                descripcion_pro_inventario.delete('1.0', tk.END)  # Limpiar el contenido si no hay producto seleccionado
+                descripcion_pro_inventario.insert(tk.END, "Información General: Seleccione un producto para ver su información.")
+                #descripcion_pro_inventario.config(state=tk.DISABLED)  # Deshabilitar la edición del ScrolledText
         except Exception as e:
-            # Mostrar mensaje de error genérico
-            messagebox.showerror("Error", f"Ha ocurrido un error al agregar el producto: {str(e)}")
-        finally:
-            # Cerrar la conexión a la base de datos si está abierta
-            if conn:
-                conn.close()
-
-        # Limpiar el formulario independientemente del resultado
-        self.limpiar_formulario(id_producto_entry, nombre_producto_entry, descripcion_entry, precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry)
-        self.notificar_existencias_bajas(productos)
+            # Manejar cualquier error y mostrar un mensaje
+            messagebox.showerror("Error", f"Error al actualizar la descripción: {str(e)}")
 
     def eliminar_producto(self, tree_inventario):
         try:
@@ -529,7 +459,8 @@ class FormularioMaestroDesing(tk.Tk):
             if conn:
                 conn.close()
 
-    def editar_producto(self, tree_inventario, nombre_producto_entry, descripcion_entry, precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry):
+    def editar_producto(self, tree_inventario, nombre_producto_entry, descripcion_entry, categoria_entry,
+                        precio_venta_entry, precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry):
         try:
             # Obtener el índice del item seleccionado en el TreeView
             item_seleccionado = tree_inventario.focus()
@@ -546,16 +477,18 @@ class FormularioMaestroDesing(tk.Tk):
                 nombre_producto_entry.insert(0, valores[1])
                 descripcion_entry.delete(0, 'end')
                 descripcion_entry.insert(0, valores[2])
+                categoria_entry.delete(0, 'end')
+                categoria_entry.insert(0, valores[3])
                 precio_venta_entry.delete(0, 'end')
-                precio_venta_entry.insert(0, valores[3])
+                precio_venta_entry.insert(0, valores[4])
                 precio_compra_entry.delete(0, 'end')
-                precio_compra_entry.insert(0, valores[4])
+                precio_compra_entry.insert(0, valores[5])
                 existencias_entry.delete(0, 'end')
-                existencias_entry.insert(0, valores[5])
+                existencias_entry.insert(0, valores[6])
                 stock_minimo_entry.delete(0, 'end')
-                stock_minimo_entry.insert(0, valores[6])
+                stock_minimo_entry.insert(0, valores[7])
                 codigo_barras_entry.delete(0, 'end')
-                codigo_barras_entry.insert(0, valores[7])
+                codigo_barras_entry.insert(0, valores[8])
 
                 # Llenar el campo de ID del producto
                 id_producto_entry.delete(0, 'end')
@@ -568,44 +501,108 @@ class FormularioMaestroDesing(tk.Tk):
             # Mostrar mensaje de error
             messagebox.showerror("Error", f"Ha ocurrido un error al editar el producto: {str(e)}")
 
-    def limpiar_formulario(self,id_producto_entry,nombre_producto_entry,descripcion_entry,precio_venta_entry,precio_compra_entry,existencias_entry,stock_minimo_entry,codigo_barras_entry):
-        # Limpiar todos los campos de entrada
-        id_producto_entry.delete(0,'end')
-        nombre_producto_entry.delete(0, 'end')
-        descripcion_entry.delete(0, 'end')
-        precio_venta_entry.delete(0, 'end')
-        precio_compra_entry.delete(0, 'end')
-        existencias_entry.delete(0, 'end')
-        stock_minimo_entry.delete(0, 'end')
-        codigo_barras_entry.delete(0, 'end')
-
-    def actualizar_treeview(self, tree_inventario):
+    def agregar_producto(self, tree_inventario, nombre_producto_entry, descripcion_entry, categoria_entry, precio_venta_entry, 
+                         precio_compra_entry, existencias_entry, stock_minimo_entry, codigo_barras_entry, id_producto_entry,descripcion_pro_inventario):
         try:
+            # Obtener los valores de los campos del formulario
+            nombre = nombre_producto_entry.get()
+            descripcion = descripcion_entry.get()
+            categoria = categoria_entry.get()
+            precio_venta = precio_venta_entry.get()
+            precio_compra = precio_compra_entry.get()
+            existencias = existencias_entry.get()
+            stock_minimo = stock_minimo_entry.get()
+            codigo_barras = codigo_barras_entry.get()
+            id_producto = id_producto_entry.get()
+
+            # Validar que no haya campos vacíos
+            if not all([nombre, descripcion, categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras]):
+                messagebox.showerror("Error", "Todos los campos son obligatorios")
+                return
+
+            # Convertir los valores de precio y existencias a números
+            precio_venta = float(precio_venta.replace('$', ''))
+            precio_compra = float(precio_compra.replace('$', ''))
+            existencias = int(existencias)
+            stock_minimo = int(stock_minimo)
+
+            # Validar que los precios y existencias sean valores válidos
+            if precio_venta <= 0 or precio_compra <= 0 or existencias < 0 or stock_minimo < 0:
+                messagebox.showerror("Error", "Los precios y existencias deben ser mayores que cero, y las existencias no pueden ser negativas")
+                return
+
             # Conectar a la base de datos
             conn = sqlite3.connect('farmacia.db')
             cursor = conn.cursor()
+
+            # Verificar si el código de barras ya existe en la base de datos
+            cursor.execute("SELECT * FROM productos WHERE codigo_barras=?", (codigo_barras,))
+            existing_product = cursor.fetchone()
+
+            # Verificar si estamos editando un producto existente o agregando uno nuevo
+            if self.editando_producto_id:  # Si hay un ID de producto en modo de edición
+                # Actualizar los datos del producto existente
+                cursor.execute("UPDATE productos SET nombre=?, descripcion=?, categoria=?, precio_venta=?, precio_compra=?, existencias=?, stock_minimo=?, codigo_barras=? WHERE id=?",
+                                (nombre, descripcion, categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras, self.editando_producto_id))
+                messagebox.showinfo("Éxito", "El producto se ha actualizado correctamente")
+                conn.commit()
+            elif existing_product:
+                messagebox.showinfo("Info", "Ya existe un producto con el mismo código de barras en la base de datos")
+                return
+            else:
+                # Generar un id único de 8 caracteres alfanuméricos
+                producto_id = str(uuid.uuid4())[:8]  # Obtiene los primeros 8 caracteres del id generado
+
+                # Insertar los datos en la tabla de productos
+                cursor.execute("INSERT INTO productos (id, nombre, descripcion, categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                (producto_id, nombre, descripcion, categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras))
+                messagebox.showinfo("Éxito", "El producto se ha agregado correctamente")
+                conn.commit()
+
+            # Limpiar el TreeView antes de volver a cargar los datos
+            tree_inventario.delete(*tree_inventario.get_children())
 
             # Obtener los datos actualizados de productos de la base de datos
             cursor.execute("SELECT * FROM productos")
             productos = cursor.fetchall()
 
-            # Limpiar el TreeView antes de volver a cargar los datos
-            tree_inventario.delete(*tree_inventario.get_children())
-
-            # Insertar los nuevos datos en el TreeView
             for producto in productos:
-                precio_venta = f"${producto[3]}"  # El índice 3 corresponde al precio de venta
-                precio_compra = f"${producto[4]}"  # El índice 4 corresponde al precio de compra
-                tree_inventario.insert("", "end", text="", values=(producto[0],producto[1], producto[2], precio_venta, precio_compra, producto[5], producto[6], producto[7]))
+                precio_venta = f"${producto[4]}"  # El índice 3 corresponde al precio de venta
+                precio_compra = f"${producto[5]}"  # El índice 4 corresponde al precio de compra
+                tree_inventario.insert("", "end", values=(producto[0], producto[1], producto[2], producto[3], precio_venta, precio_compra, producto[6], producto[7], producto[8]))
 
+        except ValueError:
+            # Mostrar mensaje de error si los campos de precio y existencias no son números válidos
+            messagebox.showerror("Error", "Los campos de precio y existencias deben ser números")
+        except sqlite3.Error as e:
+            # Mostrar mensaje de error específico de SQLite
+            messagebox.showerror("Error", f"Error de base de datos: {str(e)}")
         except Exception as e:
-            # Mostrar mensaje de error
-            messagebox.showerror("Error", f"Ha ocurrido un error al actualizar el TreeView: {str(e)}")
+            # Mostrar mensaje de error genérico
+            messagebox.showerror("Error", f"Ha ocurrido un error al agregar el producto: {str(e)}")
         finally:
-            # Cerrar la conexión a la base de datos
+            # Cerrar la conexión a la base de datos si está abierta
             if conn:
                 conn.close()
+                self.editando_producto_id = None  # Restablecer la variable de edición
+        self.limpiar_formulario(id_producto_entry,nombre_producto_entry,descripcion_entry,categoria_entry,precio_venta_entry,
+                           precio_compra_entry,existencias_entry,stock_minimo_entry,codigo_barras_entry,descripcion_pro_inventario)
 
+    def limpiar_formulario(self,id_producto_entry,nombre_producto_entry,descripcion_entry,categoria_entry,precio_venta_entry,
+                           precio_compra_entry,existencias_entry,stock_minimo_entry,codigo_barras_entry,descripcion_pro_inventario):
+        
+              # Limpiar todos los campos de entrada
+        id_producto_entry.delete(0,'end')
+        nombre_producto_entry.delete(0, 'end')
+        descripcion_entry.delete(0, 'end')
+        categoria_entry.delete(0, 'end')
+        precio_venta_entry.delete(0, 'end')
+        precio_compra_entry.delete(0, 'end')
+        existencias_entry.delete(0, 'end')
+        stock_minimo_entry.delete(0, 'end')
+        codigo_barras_entry.delete(0, 'end')
+        descripcion_pro_inventario.delete(1.0, tk.END)
+    
     def cargar_excel(self, tree_inventario):
         try:
             # Abrir el cuadro de diálogo para seleccionar un archivo Excel
@@ -629,15 +626,16 @@ class FormularioMaestroDesing(tk.Tk):
                 producto_id = row[0].strip() if row[0] and row[0].strip() else str(uuid.uuid4())[:8]  # Suponiendo que la primera columna es el ID
                 nombre = row[1]
                 descripcion = row[2]
-                precio_venta = row[3]
-                precio_compra = row[4]
-                existencias = row[5]
-                stock_minimo = row[6]
-                codigo_barras = row[7]
+                categoria = row[3]
+                precio_venta = row[4]
+                precio_compra = row[5]
+                existencias = row[6]
+                stock_minimo = row[7]
+                codigo_barras = row[8]
 
                 # Insertar los datos en la tabla de productos
-                cursor.execute("INSERT INTO productos (id, nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                                (producto_id, nombre, descripcion, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras))
+                cursor.execute("INSERT INTO productos (id, nombre, descripcion,categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
+                                (producto_id, nombre, descripcion,categoria, precio_venta, precio_compra, existencias, stock_minimo, codigo_barras))
 
                 # Incrementar el contador de productos insertados
                 productos_insertados += 1
@@ -676,7 +674,7 @@ class FormularioMaestroDesing(tk.Tk):
             hoja_excel.title = "productos"
             
             # Agregar encabezados de columna (asegúrate de que los nombres coincidan con los nombres de las columnas en la base de datos)
-            hoja_excel.append(["id", "nombre", "descripcion", "precio_venta", "precio_compra", "existencias", "stock_minimo", "codigo_barras"])
+            hoja_excel.append(["id", "nombre", "descripcion", "categoria","precio_venta", "precio_compra", "existencias", "stock_minimo", "codigo_barras"])
             
             # Agregar datos de productos a las filas
             for producto in productos:
@@ -704,25 +702,13 @@ class FormularioMaestroDesing(tk.Tk):
             # Cerrar la conexión a la base de datos
             conn.close()
 
-    def notificar_existencias_bajas(self, productos):
-        # Verificar si hay algún producto con existencias menores a 10
-        existencias_bajas = any(producto[5] < 10 for producto in productos)  # El índice 5 corresponde a las existencias
-
-        # Actualizar la visibilidad y el texto de la etiqueta
-        if existencias_bajas:
-            self.notificacion_existencias_bajas.config(text="\uf06a Existencias Bajas, revisar botón: informe stock mínimo \uf06a", fg="red")
-            self.notificacion_existencias_bajas.place(relx=0.7, rely=0.05, anchor='n')
-            self.notificacion_existencias_bajas.lift()  # Traer la etiqueta al frente
-        else:
-            self.notificacion_existencias_bajas.place_forget()  # Ocultar la etiqueta si no hay existencias bajas
-
-    def mostrar_informe_min_stock(self, productos):
+    def mostrar_informe_min_stock(self):
         # Verificar si la ventana ya está abierta
         if hasattr(self, "informe_window") and self.informe_window.winfo_exists():
             self.informe_window.deiconify()  # Enfocar ventana existente si está abierta
-            self.actualizar_informe_min_stock(productos)  # Actualizar contenido
+            self.actualizar_informe_min_stock_desde_bd()  # Actualizar contenido desde la base de datos
             return
-        
+            
         # Crear una nueva ventana
         self.informe_window = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         self.informe_window.title("INFORME")
@@ -735,8 +721,8 @@ class FormularioMaestroDesing(tk.Tk):
 
         # Configurar el estilo
         style = ttk.Style()
-        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font = ("OCR A Extended", 10))  # Modify the font of the body
-        style.configure("mystyle.Treeview.Heading", font = ("OCR A Extended", 9,"bold"))  # Modify the font of the headings
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=("OCR A Extended", 10))  # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font=("OCR A Extended", 9, "bold"))  # Modify the font of the headings
         style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])  # Remove the borders
 
         # Crear un Treeview en el frame con el estilo configurado
@@ -760,38 +746,29 @@ class FormularioMaestroDesing(tk.Tk):
         self.informe_treeview.column("#0", width=0, stretch=tk.NO)  # Oculta la columna de índice
         self.informe_treeview.column("Nombre", width=150, anchor="center")
         self.informe_treeview.column("Existencias", width=100, anchor="center")
+        
+        # Obtener y mostrar los productos con existencias mínimas desde la base de datos
+        self.actualizar_informe_min_stock_desde_bd()
 
-        # Obtener y agregar los productos al Treeview con existencias mínimas
-        for producto in productos:
-            if producto[5] < producto[6]:  # Verificar si las existencias son menores al stock mínimo
-                self.informe_treeview.insert("", "end", values=(producto[1], producto[5]))
-    
-    def actualizar_informe_min_stock(self, productos):
+    def actualizar_informe_min_stock_desde_bd(self):
         # Limpiar contenido anterior
         for item in self.informe_treeview.get_children():
             self.informe_treeview.delete(item)
 
-        # Obtener y agregar los productos al Treeview con existencias mínimas
-        for producto in productos:
-            if producto[5] < producto[6]:  # Verificar si las existencias son menores al stock mínimo
-                self.informe_treeview.insert("", "end", values=(producto[1], producto[5]))
+        # Conectar a la base de datos
+        conexion = sqlite3.connect('farmacia.db')
+        cursor = conexion.cursor()
 
-    def agregar_producto_a_treeview(self, producto, tree_inventario):
-        # Agregar el signo "$" al precio de venta y de compra
-        precio_venta = f"${producto[3]}"
-        precio_compra = f"${producto[4]}"
+        # Realizar la consulta SQL para seleccionar productos con existencias por debajo del stock mínimo
+        cursor.execute("SELECT id, nombre, existencias, stock_minimo FROM productos WHERE existencias < stock_minimo")
+        productos_con_existencias_bajas = cursor.fetchall()
 
-        # Configurar el ícono y los tags dinámicamente según las existencias
-        if producto[5] < 10:
-            existencias = f"\uf243 {producto[5]}"  # Agregar el icono correspondiente si existencias son menores que 10
-            tags = ("rojo",)  # Marcar la fila con el tag "rojo"
-        else:
-            existencias = producto[5]  # No se agrega ningún icono si las existencias son mayores o iguales a 10
-            tags = ()  # No se aplica ningún tag si las existencias son mayores o iguales a 10
+        # Mostrar los productos en el Treeview
+        for producto in productos_con_existencias_bajas:
+            self.informe_treeview.insert("", "end", values=(producto[1], producto[2]))
 
-        # Insertar el producto en el Treeview con los valores y tags correspondientes
-        tree_inventario.insert("", "end", text="", values=(producto[0], producto[1], producto[2], precio_venta, precio_compra, existencias, producto[6], producto[7]), tags=tags)
-        
+        # Cerrar la conexión con la base de datos
+        conexion.close()
 
 #---------------------FUNCIONES PARA VENTAS--------------------------------
 
@@ -930,8 +907,6 @@ class FormularioMaestroDesing(tk.Tk):
         btn_agregar_articulo = CTkButton(filtrado_productos_venta, text="\uf217 Agregar\narticulo", width=70, height=70, font=("OCR A Extended", 14), 
                                          text_color='black', command=lambda: self.agregar_articulo(treeview, entry_cantidad, entry_precio_venta, entry_nombre_producto_noinv, detalles_treeview, lbl_total_venta))
         btn_agregar_articulo.grid(column=6, row=0,sticky='nwse', padx=10, pady=10)
-
-        
 
         # Actualizar el filtrado para mostrar todos los productos inicialmente
         self.actualizar_filtrado(None, entry_busqueda_producto, treeview, lbl_pro_sel,lbl_pro_descripcion,entry_id_producto)
@@ -1084,8 +1059,6 @@ class FormularioMaestroDesing(tk.Tk):
         except ValueError:
             messagebox.showerror("Error", "Por favor, ingrese un monto válido.")
 
- 
-
     def calcular_total_venta(self,detalles_treeview,lbl_total_venta):
             # Obtener todas las filas del Treeview de detalles de venta
             filas = detalles_treeview.get_children()
@@ -1147,12 +1120,9 @@ class FormularioMaestroDesing(tk.Tk):
             lbl_pro_descripcion.delete("1.0", tk.END)  # Limpiar el ScrolledText
             lbl_pro_descripcion.insert(tk.END, descripcion)  # Insertar la nueva descripción
 
-           
-
             entry_cantidad.delete(0, tk.END)
             entry_cantidad.insert(0, "1")
-            # Calcular el subtotal y actualizar la etiqueta
-            #self.move_selection_filtrado(event,treeview)
+         
             self.actualizar_precio_cantidad(event, entry_precio_venta, entry_cantidad, lbl_subtotal_venta)
 
     def actualizar_filtrado(self, event, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion, entry_id_producto):
@@ -1340,7 +1310,7 @@ class FormularioMaestroDesing(tk.Tk):
                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                        detalles_treeview, entry_precio_producto_detalle,
                        entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
-                       lbl_total_venta,entry_valor_recibido,lbl_vuelto):
+                       lbl_total_venta, entry_valor_recibido, lbl_vuelto):
 
         # Obtener la fecha y hora actual
         fecha_venta = datetime.now().strftime("%Y-%m-%d")
@@ -1348,7 +1318,7 @@ class FormularioMaestroDesing(tk.Tk):
         metodo_pago = "Contado"
         id_cliente = self.generar_codigo_aleatorio()
         cliente = "consumidor final"  # Aquí deberías obtener el cliente adecuado, por ejemplo, seleccionándolo de una lista
-        
+
         # Conectar a la base de datos
         conn = sqlite3.connect('farmacia.db')
         cursor = conn.cursor()
@@ -1367,6 +1337,7 @@ class FormularioMaestroDesing(tk.Tk):
                     metodo_pago TEXT,
                     fecha DATE,
                     hora TIME,
+                    categoria_producto TEXT,
                     FOREIGN KEY (id_producto) REFERENCES productos (id)
                 )''')
 
@@ -1382,7 +1353,7 @@ class FormularioMaestroDesing(tk.Tk):
                 cantidad = float(valores[3])  # Obtener la cantidad
                 precio_unitario = float(valores[2])
                 subtotal = float(valores[4])  # Obtener el subtotal
-                                    
+                
                 # Consultar las existencias actuales del producto
                 cursor.execute("SELECT existencias FROM productos WHERE id = ?", (id_producto,))
                 existencias_result = cursor.fetchone()
@@ -1405,11 +1376,16 @@ class FormularioMaestroDesing(tk.Tk):
                 # Actualizar las existencias del producto en la base de datos
                 cursor.execute("UPDATE productos SET existencias = ? WHERE id = ?", (nuevas_existencias, id_producto))
 
+                # Consultar la categoría del producto
+                cursor.execute("SELECT categoria FROM productos WHERE id = ?", (id_producto,))
+                categoria_result = cursor.fetchone()
+                categoria_producto = categoria_result[0] if categoria_result else None
+
                 # Insertar el detalle de venta en la tabla de ventas
                 cursor.execute('''
-                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cliente, cantidad, precio_unitario, total, metodo_pago, fecha, hora)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta, hora_venta))
+                    INSERT INTO ventas (id, id_producto, producto, id_cliente, cliente, cantidad, precio_unitario, total, metodo_pago, fecha, hora, categoria_producto)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (id_detalle_venta, id_producto, nombre_producto, id_cliente, cliente, cantidad, precio_unitario, subtotal, metodo_pago, fecha_venta, hora_venta, categoria_producto))
 
             # Confirmar la transacción
             conn.commit()
@@ -1447,6 +1423,7 @@ class FormularioMaestroDesing(tk.Tk):
 
             # Cerrar la conexión en caso de error
             conn.close()
+
  
     def generar_codigo_aleatorio(self):
         # Definir la longitud del código
@@ -1597,6 +1574,13 @@ class FormularioMaestroDesing(tk.Tk):
                             command=lambda: self.borrar_registro(treeview_historial_ventas, total_diario_ventas))
         eliminar_registro.pack(side="left", padx=10, pady=10)
 
+        # Frame para el gráfico de barras
+        self.frame_grafico = ttk.Frame(self.cuerpo_principal, width=300)  # Ancho ajustable según tus necesidades
+        self.frame_grafico.pack(side="right", fill="both", expand=True, padx=20, pady=20)
+
+        today = datetime.today().date()
+        self.load_sales(today, today, treeview_historial_ventas, total_diario_ventas)
+
     def borrar_registro(self, treeview_historial_ventas, total_diario_ventas):
         selected_item = treeview_historial_ventas.selection()
 
@@ -1678,7 +1662,29 @@ class FormularioMaestroDesing(tk.Tk):
         # Mostrar las ventas en el Treeview
         for sale in sales:
             treeview_historial_ventas.insert('', 'end', values=sale)
+        self.generar_grafico_barras(sales)
 
+    def generar_grafico_barras(self, data):
+        productos = [sale[1] for sale in data]
+        cantidades = [sale[2] for sale in data]
+
+        # Limpiar el frame del gráfico
+        for widget in self.frame_grafico.winfo_children():
+            widget.destroy()
+
+        fig, ax = plt.subplots()
+        ax.bar(productos, cantidades)
+        ax.set_xlabel('Productos')
+        ax.set_ylabel('Cantidad')
+        ax.set_title('Productos Más Vendidos')
+
+        canvas = FigureCanvasTkAgg(fig, master=self.frame_grafico)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+       # canvas.get_tk_widget().configure(yscrollcommand=None, xscrollcommand=None)
+    
+        
 
 
 """"
@@ -1937,6 +1943,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS productos (
                     id TEXT PRIMARY KEY,
                     nombre TEXT NOT NULL,
                     descripcion TEXT,
+                    categoria TEXT,
                     precio_venta REAL,
                     precio_compra REAL,
                     existencias INTEGER,
@@ -1957,6 +1964,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     metodo_pago TEXT,
                     fecha DATE,
                     hora TIME,
+                    categoria_producto TEXT,
                     FOREIGN KEY (id_producto) REFERENCES productos (id)
                 )''')
 
