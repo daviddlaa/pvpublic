@@ -17,9 +17,6 @@ from tkcalendar import Calendar
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
-
-
 class FormularioMaestroDesing(tk.Tk):
     
     def __init__(self):
@@ -33,7 +30,7 @@ class FormularioMaestroDesing(tk.Tk):
         self.controles_menu_lateral()
         self.controles_cuerpo()
         self.editando_producto_id = None
-     
+       
     def config_window(self):
         self.title('Punto de Venta')
         self.iconbitmap("./imagenes/logo.ico")
@@ -54,22 +51,22 @@ class FormularioMaestroDesing(tk.Tk):
         
     def controles_barra_superior(self):
 
-        self.labelTitulo =  tk.Label(self.barra_superior,text="Menu Principal")
+        self.labelTitulo =  tk.Label(self.barra_superior,text="Menu Principal",font=("OCR A Extended", 14))
         
-        self.labelTitulo.config(fg="#fff",font=("Roboto",15), bg=COLOR_BARRA_SUPERIOR,
+        self.labelTitulo.config(fg="#fff",font=("OCR A Extended", 14), bg=COLOR_BARRA_SUPERIOR,
         pady=10, width=16)
         self.labelTitulo.pack(side=tk.LEFT)
 
         # Botón del menú lateral
         self.buttonMenuLateral = CTkButton(self.barra_superior, text='\uf0c9',
-                                           command=self.toggle_panel,fg_color=COLOR_BARRA_SUPERIOR,font=("Arial",20),hover_color=COLOR_BARRA_SUPERIOR)
+                                           command=self.toggle_panel,fg_color=COLOR_BARRA_SUPERIOR,font=("OCR A Extended", 14),hover_color=COLOR_BARRA_SUPERIOR)
         self.buttonMenuLateral.pack(side=tk.LEFT)
 
 
         self.labelTitulo = tk.Label(
             self.barra_superior,text="@bacosoluciones")
         self.labelTitulo.config(
-            fg="#fff",font=("Roboto",10),bg=COLOR_BARRA_SUPERIOR,padx=10,width=20)
+            fg="#fff",font=("OCR A Extended", 14),bg=COLOR_BARRA_SUPERIOR,padx=10,width=20)
         self.labelTitulo.pack(side=tk.RIGHT)
 
     def controles_menu_lateral(self):
@@ -84,19 +81,19 @@ class FormularioMaestroDesing(tk.Tk):
         self.buttonInventario = tk.Button(self.menu_lateral,command=self.Inventario) 
         self.buttonIngresoVentas = tk.Button(self.menu_lateral,command=self.ventas) 
         self.buttonHistorialVentas = tk.Button(self.menu_lateral,command=self.historial_ventas_calendario) 
-       # self.buttonProveedores= tk.Button(self.menu_lateral) 
        # self.buttonClientes = tk.Button(self.menu_lateral,command=self.mostrar_clientes)  
        # self.buttonDatosNegocio = tk.Button(self.menu_lateral,command=self.datos_negocio)
         self.buttonUsuarios = tk.Button(self.menu_lateral)
+        self.buttonSalir= tk.Button(self.menu_lateral) 
      
         buttons_info = [
         ("INVENTARIO", "\uf494", self.buttonInventario), 
         ("CAJA REGISTRADORA", "\uf788", self.buttonIngresoVentas), 
         ("HISTORIAL VENTAS", "\uf073", self.buttonHistorialVentas), 
-        #("Proveedores", "\ue58d", self.buttonProveedores),
         #("CLIENTES", "\uf007", self.buttonClientes),
         #("DATOS NEGOCIO", "\uf54e", self.buttonDatosNegocio),
         ("USUARIOS", "\ue594", self.buttonUsuarios),
+        ("SALIR", "\uf2f5", self.buttonSalir),
         ]
 
         for text, icon, button in buttons_info:
@@ -143,7 +140,7 @@ class FormularioMaestroDesing(tk.Tk):
         
         ESTILO_CTKBOTONES_DATOS_INVENTARIO = {
             'width': 50,
-            'height': 30,
+            'height': 40,
             'text_color': 'black',
             'font': ("OCR A Extended", 13)
         }
@@ -164,7 +161,7 @@ class FormularioMaestroDesing(tk.Tk):
     
         # Crear un formulario para agregar nuevos elementos al inventario
         formulario_inventario = tk.LabelFrame(self.cuerpo_principal,text="FORMULARIO DE PRODUCTOS: " ,bg=COLOR_CUERPO_PRINCIPAL,**ESTILO_TITULO_LABEL_DATOS_INVENTARIO)
-        formulario_inventario.pack(padx=10, pady=(10,0), fill='x', expand=True)
+        formulario_inventario.pack(padx=10, pady=10, fill='x', expand=True,ipadx=10,ipady=10)
 
         
         # Entry oculto para el ID
@@ -226,7 +223,7 @@ class FormularioMaestroDesing(tk.Tk):
              
         # CREAR EL TREEVIEW -------------------------------------------------
         treeview_inventario_frame = tk.LabelFrame(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
-        treeview_inventario_frame.pack(padx=10, pady=10, fill='both', expand=True)
+        treeview_inventario_frame.pack(padx=10, pady=10, fill='both',ipadx=10,ipady=10)
 
         # Configurar el Grid para que el frame se expanda con la ventana
         treeview_inventario_frame.grid_rowconfigure(0, weight=1)
@@ -275,7 +272,7 @@ class FormularioMaestroDesing(tk.Tk):
         descripcion_pro_inventario.config(bg=COLOR_CUERPO_PRINCIPAL)  
 
         buttons_frame = tk.LabelFrame(self.cuerpo_principal,text="ACCIONES PARA EL INVENTARIO: ",background=COLOR_CUERPO_PRINCIPAL,**ESTILO_TITULO_LABEL_DATOS_INVENTARIO)
-        buttons_frame.pack(side="left",padx=10, pady=10)
+        buttons_frame.pack(side="left",padx=10, pady=10,ipady=10)
 
         editar_button = CTkButton(buttons_frame, text="\uf044"" Editar",**ESTILO_CTKBOTONES_DATOS_INVENTARIO,command=lambda: self.editar_producto(tree_inventario, 
                         nombre_producto_entry, descripcion_entry, categoria_entry,
@@ -295,7 +292,7 @@ class FormularioMaestroDesing(tk.Tk):
         frame_alerta.pack(side="right",padx=10, pady=10)
 
           # Crear la etiqueta para la notificación de existencias bajas
-        notificacion_existencias_bajas = CTkLabel(frame_alerta,text="", **ESTILO_TITULO_LABEL_DATOS_INVENTARIO,text_color="red") 
+        notificacion_existencias_bajas = ParpadeoEtiqueta(frame_alerta,text="") 
         notificacion_existencias_bajas.grid(column=0,row=0,**ALINEACION_FORMULARIO)
         self.verificar_existencias_bajas(tree_inventario, notificacion_existencias_bajas)
         
@@ -317,7 +314,7 @@ class FormularioMaestroDesing(tk.Tk):
 
             # Si hay existencias bajas, mostrar notificación
             if any(existencias_bajas):
-                notificacion_existencias_bajas.configure(text="¡Existen productos con existencias bajas!")
+                notificacion_existencias_bajas.configure(text="¡EXISTEN PRODUCTOS CON EXISTENCIAS BAJAS!\nREVISAR EL INFORME.")
             else:
                 notificacion_existencias_bajas.configure(text="")  # Limpiar la notificación si no hay existencias bajas
 
@@ -714,6 +711,7 @@ class FormularioMaestroDesing(tk.Tk):
         self.informe_window.title("INFORME")
         self.informe_window.iconbitmap("./imagenes/logo.ico")
         self.informe_window.geometry("300x200")
+        self.informe_window.resizable(False, False)
 
         # Crear un Frame para contener el Treeview y el Scrollbar
         tree_frame = tk.Frame(self.informe_window)
@@ -810,13 +808,20 @@ class FormularioMaestroDesing(tk.Tk):
                                                                      detalles_treeview,entry_nombre_producto_noinv, entry_precio_producto_detalle, 
                                                                      entry_cantidad_producto_detalle, lbl_total_venta,entry_valor_recibido,lbl_vuelto))
 
-
-        inicio_caja = CTkButton(botones_accesos_rapidos, text="INICIO\nDE\nOPERACIONES",width=70, height=70, text_color='black',font=("OCR A Extended",12))
+        inicio_caja = CTkButton(botones_accesos_rapidos, text="INICIO\nDE\nOPERACIONES",width=70, height=70, text_color='black',font=("OCR A Extended",12),
+                                command=lambda: self.formulario_inicio_operaciones())
         inicio_caja.grid(column=2,row=0, padx=10, pady=10)
 
-        cierre_caja = CTkButton(botones_accesos_rapidos, text="CIERRE\nDE\nCAJA",width=70, height=70, text_color='black',font=("OCR A Extended",12))
+        cierre_caja = CTkButton(botones_accesos_rapidos, text="CIERRE\nDE\nCAJA",width=70, height=70, text_color='black',font=("OCR A Extended",12),
+                                command=lambda:self.formulario_cierre_caja())
         cierre_caja.grid(column=3,row=0, padx=10, pady=10)
         
+        boton_movimientos_caja = CTkButton(botones_accesos_rapidos,text="MOVIMIENTOS\nDE\nCAJA",width=70, height=70, 
+                                           text_color='black',font=("OCR A Extended",12),command=lambda: self.formulario_movimientos_caja())
+        boton_movimientos_caja.grid(column=4,row=0, padx=10, pady=10)
+
+        etiqueta_estado_operaciones = ParpadeoEtiqueta(botones_accesos_rapidos,text="JORNADA EN CURSO",font=("OCR A Extended",16))
+        etiqueta_estado_operaciones.grid(column=5,row=0, padx=10, pady=10)
 
         # Entry para ingresar el término de búsqueda
         entry_busqueda_producto = CTkEntry(filtrado_productos_venta, bg_color=COLOR_CUERPO_PRINCIPAL, width=300, 
@@ -862,7 +867,6 @@ class FormularioMaestroDesing(tk.Tk):
         # Vincular la función de actualización del precio al evento de selección en el Treeview
         treeview.bind("<<TreeviewSelect>>", lambda event: self.actualizar_precio_venta(event, entry_precio_venta, treeview, 
                                                                                        entry_cantidad, lbl_subtotal_venta, lbl_pro_sel, descripcion, lbl_pro_descripcion,entry_id_producto))
-
 
        # Fondo deseado
         fondo = "#F9F9FA"
@@ -1307,10 +1311,10 @@ class FormularioMaestroDesing(tk.Tk):
             messagebox.showerror("Error", "Por favor, seleccione una fila para editar en el Treeview de detalles.")
 
     def boton_grabar_venta(self, entry_busqueda_producto, treeview, lbl_pro_sel, lbl_pro_descripcion,
-                       entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
-                       detalles_treeview, entry_precio_producto_detalle,
-                       entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
-                       lbl_total_venta, entry_valor_recibido, lbl_vuelto):
+                        entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
+                        detalles_treeview, entry_precio_producto_detalle,
+                        entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
+                        lbl_total_venta, entry_valor_recibido, lbl_vuelto):
 
         # Obtener la fecha y hora actual
         fecha_venta = datetime.now().strftime("%Y-%m-%d")
@@ -1324,6 +1328,16 @@ class FormularioMaestroDesing(tk.Tk):
         cursor = conn.cursor()
 
         try:
+            # Verificar si hay una jornada en curso para la fecha actual
+            cursor.execute("SELECT * FROM operaciones_caja WHERE fecha_inicio = ? AND estado = ?", (fecha_venta, "Jornada en curso"))
+            jornada_en_curso = cursor.fetchone()
+
+            if not jornada_en_curso:
+                messagebox.showwarning("Aviso", "No hay una jornada en curso para el día de hoy. No se puede grabar la venta, INICIE OPERACIONES.")
+                self.formulario_inicio_operaciones()
+                return
+
+            # Si hay una jornada en curso, procede a grabar la venta
             # Crear la tabla de ventas si no existe
             cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     id TEXT PRIMARY KEY,
@@ -1354,32 +1368,27 @@ class FormularioMaestroDesing(tk.Tk):
                 precio_unitario = float(valores[2])
                 subtotal = float(valores[4])  # Obtener el subtotal
                 
-                # Consultar las existencias actuales del producto
+                # Verificar si el producto está en la base de datos
                 cursor.execute("SELECT existencias FROM productos WHERE id = ?", (id_producto,))
                 existencias_result = cursor.fetchone()
                 if existencias_result is None:
-                    respuesta = messagebox.askyesno("Producto no encontrado", f"El producto {nombre_producto} no está en el inventario. ¿Desea continuar con la venta?")
-                    if not respuesta:
-                        return  # Detener la función si el usuario elige no continuar
+                    existencias_actuales = 0  # Establecer existencias actuales como 0 si el producto no está en la base de datos
+                    
+                    # Establecer la categoría predeterminada como "Producto No inventariado"
+                    categoria_producto = "Producto No inventariado"
                 else:
                     existencias_actuales = existencias_result[0]
-                
-                # Verificar si hay suficientes existencias
-                if existencias_actuales < cantidad:
-                    messagebox.showerror("Error", f"No hay suficientes existencias para el producto {nombre_producto}.")
-                    conn.close()
-                    return
+                    
+                    # Consultar la categoría del producto
+                    cursor.execute("SELECT categoria FROM productos WHERE id = ?", (id_producto,))
+                    categoria_result = cursor.fetchone()
+                    categoria_producto = categoria_result[0] if categoria_result else None
                 
                 # Calcular las nuevas existencias después de la venta
                 nuevas_existencias = existencias_actuales - cantidad
 
                 # Actualizar las existencias del producto en la base de datos
                 cursor.execute("UPDATE productos SET existencias = ? WHERE id = ?", (nuevas_existencias, id_producto))
-
-                # Consultar la categoría del producto
-                cursor.execute("SELECT categoria FROM productos WHERE id = ?", (id_producto,))
-                categoria_result = cursor.fetchone()
-                categoria_producto = categoria_result[0] if categoria_result else None
 
                 # Insertar el detalle de venta en la tabla de ventas
                 cursor.execute('''
@@ -1412,7 +1421,7 @@ class FormularioMaestroDesing(tk.Tk):
                                 entry_precio_venta, entry_cantidad, lbl_subtotal_venta,
                                 detalles_treeview, entry_precio_producto_detalle,
                                 entry_nombre_producto_noinv, entry_cantidad_producto_detalle, 
-                                lbl_total_venta,entry_valor_recibido,lbl_vuelto)
+                                lbl_total_venta, entry_valor_recibido, lbl_vuelto)
 
             # Mostrar un mensaje de éxito
             messagebox.showinfo("Venta grabada", "La venta se ha grabado exitosamente en la base de datos.")
@@ -1424,7 +1433,6 @@ class FormularioMaestroDesing(tk.Tk):
             # Cerrar la conexión en caso de error
             conn.close()
 
- 
     def generar_codigo_aleatorio(self):
         # Definir la longitud del código
         longitud = 8
@@ -1511,6 +1519,569 @@ class FormularioMaestroDesing(tk.Tk):
             treeview.selection_add(treeview.next(treeview.selection()))
         elif event.keysym == 'Return':  # Verificar si se presionó Enter
             entry_cantidad.focus()  # Hacer que el cursor caiga en el entry de cantidad
+    
+    def formulario_inicio_operaciones(self):
+        
+        ESTILO_CTKBOTONES = {
+            'width': 50,
+            'height': 40,
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13)
+        }
+       
+        ESTILO_ENTRYS_LABEL = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 14),
+               
+        }
+        
+        ESTILO_TITULO = {
+            
+            'font': ("OCR A Extended", 16,"bold"),  
+
+        }
+        
+        conexion = sqlite3.connect('farmacia.db')
+        cursor = conexion.cursor()
+
+        # Verificar si ya existe un registro para la fecha actual
+        fecha_actual = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute("SELECT COUNT(*) FROM operaciones_caja WHERE fecha_inicio = ?", (fecha_actual,))
+        existe_registro = cursor.fetchone()[0]
+
+        if existe_registro:
+            messagebox.showinfo("Ya se inicio la caja", "La jornada de trabajo esta en curso.")
+            return
+    
+        
+        # Crear una nueva ventana
+        self.inicio_operaciones = tk.Toplevel(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        self.inicio_operaciones.title("Inicio de Operaciones")
+        self.inicio_operaciones.iconbitmap("./imagenes/logo.ico")
+        #self.inicio_operaciones.geometry("400x300")
+        self.inicio_operaciones.resizable(False, False)
+
+        # Crear el formulario dentro de la ventana
+        frame_formulario_inicio_operaciones = tk.Frame(self.inicio_operaciones,background=COLOR_CUERPO_PRINCIPAL)
+        frame_formulario_inicio_operaciones.pack(padx=10, pady=10)
+
+        # Etiquetas y campos de entrada del formulario
+        lbl_titulo_inicio = CTkLabel(frame_formulario_inicio_operaciones, text="Inicio de Operaciones",**ESTILO_TITULO)
+        lbl_titulo_inicio.grid(column=0, row=0, columnspan=2, pady=5)
+
+        entry_id_inicio_operaciones=tk.Entry(frame_formulario_inicio_operaciones)
+        entry_id_inicio_operaciones.grid_forget
+        codigo_aleatorio = self.generar_codigo_aleatorio() 
+        entry_id_inicio_operaciones.insert(0,codigo_aleatorio)
+
+        entry_estado_inicial=tk.Entry(frame_formulario_inicio_operaciones)
+        entry_estado_inicial.grid_forget
+        entry_estado_inicial.insert(0,"Jornada en curso")
+
+        lbl_fecha_inicio = CTkLabel(frame_formulario_inicio_operaciones, text="Fecha de Inicio:",**ESTILO_ENTRYS_LABEL)
+        lbl_fecha_inicio.grid(column=0, row=1, padx=5, pady=5, sticky='e')
+
+        entry_fecha_inicio = CTkEntry(frame_formulario_inicio_operaciones,**ESTILO_ENTRYS_LABEL)
+        entry_fecha_inicio.grid(column=1, row=1, padx=5, pady=5, sticky='w')
+        entry_fecha_inicio.insert(0, datetime.now().strftime('%Y-%m-%d'))
+        entry_fecha_inicio.configure(state=tk.DISABLED)
+
+        lbl_hora_inicio = CTkLabel(frame_formulario_inicio_operaciones, text="Hora de Inicio:",**ESTILO_ENTRYS_LABEL)
+        lbl_hora_inicio.grid(column=0, row=2, padx=5, pady=5, sticky='e')
+
+        entry_hora_inicio = CTkEntry(frame_formulario_inicio_operaciones,**ESTILO_ENTRYS_LABEL)
+        entry_hora_inicio.grid(column=1, row=2, padx=5, pady=5, sticky='w')
+        entry_hora_inicio.insert(0, datetime.now().strftime('%H:%M:%S'))
+        entry_hora_inicio.configure(state=tk.DISABLED)
+
+        lbl_usuario_logueado = CTkLabel(frame_formulario_inicio_operaciones, text="Usuario:",**ESTILO_ENTRYS_LABEL)
+        lbl_usuario_logueado.grid(column=0, row=3, padx=5, pady=5, sticky='e')
+
+        entry_usuario_logueado = CTkEntry(frame_formulario_inicio_operaciones,**ESTILO_ENTRYS_LABEL)
+        entry_usuario_logueado.grid(column=1, row=3, padx=5, pady=5, sticky='w')
+        entry_usuario_logueado.insert(0,"Administrador")
+        entry_usuario_logueado.configure(state=tk.DISABLED)
+
+        lbl_valor_inicio = CTkLabel(frame_formulario_inicio_operaciones, text="Ingrese Valor Inicial:",**ESTILO_ENTRYS_LABEL)
+        lbl_valor_inicio.grid(column=0, row=4, padx=5, pady=5, sticky='e')
+    
+        entry_valor_inicial = CTkEntry(frame_formulario_inicio_operaciones,placeholder_text="\uf53d",**ESTILO_ENTRYS_LABEL)
+        entry_valor_inicial.grid(column=1, row=4, padx=5, pady=5, sticky='w')
+    
+        btn_confirmar = CTkButton(frame_formulario_inicio_operaciones,text="Confirmar Inicio",command=lambda :self.guardar_operacion(entry_id_inicio_operaciones, 
+                                                                                                                                     entry_fecha_inicio, entry_hora_inicio, 
+                                                                                                                                     entry_usuario_logueado, entry_valor_inicial,
+                                                                                                                                     entry_estado_inicial),**ESTILO_CTKBOTONES)
+        btn_confirmar.grid(column=1, row=5, padx=5, pady=5, sticky='w')
+    
+    def guardar_operacion(self, entry_id_inicio_operaciones, entry_fecha_inicio, entry_hora_inicio, entry_usuario_logueado, entry_valor_inicial,entry_estado_inicial):
+        try:
+            # Conexión a la base de datos
+            conexion = sqlite3.connect('farmacia.db')
+            cursor = conexion.cursor()
+
+            # Obtener los valores ingresados por el usuario
+            id_inicio_operaciones = entry_id_inicio_operaciones.get()
+            fecha_inicio = entry_fecha_inicio.get()
+            hora_inicio = entry_hora_inicio.get()
+            estado_inicial = entry_estado_inicial.get()
+            usuario = entry_usuario_logueado.get()
+            valor_inicial = entry_valor_inicial.get()
+
+            # Insertar los datos en la tabla operaciones_caja
+            cursor.execute('''INSERT INTO operaciones_caja 
+                            (id, fecha_inicio, hora_inicio, usuario, valor_inicial,estado) 
+                            VALUES (?, ?, ?, ?, ?,?)''', 
+                            (id_inicio_operaciones, fecha_inicio, hora_inicio, usuario, float(valor_inicial),estado_inicial))
+            
+            conexion.commit()  # Confirmar la transacción
+
+            # Mostrar un mensaje de confirmación
+            messagebox.showinfo("Operación Exitosa", "Los datos se han guardado correctamente.")
+
+        except Exception as e:
+            # En caso de error, deshacer cualquier cambio en la base de datos
+            conexion.rollback()
+            # Mostrar un mensaje de error
+            messagebox.showerror("Error", f"No se pudo guardar la operación. Error: {str(e)}")
+
+        finally:
+            # Cerrar la conexión a la base de datos
+            if conexion:
+                conexion.close()
+
+    def formulario_cierre_caja(self):
+        ESTILO_CTKBOTONES = {
+            'width': 50,
+            'height': 50,  # Ajustado para botones más grandes
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13)
+        }
+    
+        ESTILO_ENTRYS_LABEL = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 14)
+        }
+        
+        ESTILO_TITULO = {
+            'font': ("OCR A Extended", 16, "bold")
+        }
+
+        # Crear una nueva ventana
+        self.cierre_caja = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
+        self.cierre_caja.title("Cierre de caja")
+        self.cierre_caja.iconbitmap("./imagenes/logo.ico")
+        #self.cierre_caja.geometry("500x600")
+        self.cierre_caja.resizable(False, False)
+
+        # Crear el formulario dentro de la ventana
+        frame_formulario_cierre_caja = tk.Frame(self.cierre_caja, background=COLOR_CUERPO_PRINCIPAL)
+        frame_formulario_cierre_caja.pack(padx=10, pady=10)
+
+        # Etiquetas y campos de entrada del formulario
+        lbl_titulo_cierre = CTkLabel(frame_formulario_cierre_caja, text="Cierre de caja", **ESTILO_TITULO)
+        lbl_titulo_cierre.grid(column=0, row=0, columnspan=2, pady=5)
+
+        lbl_fecha_cierre = CTkLabel(frame_formulario_cierre_caja, text="Fecha de Inicio:", **ESTILO_ENTRYS_LABEL)
+        lbl_fecha_cierre.grid(column=0, row=1, padx=5, pady=5, sticky='e')
+
+        entry_fecha_cierre = CTkEntry(frame_formulario_cierre_caja, **ESTILO_ENTRYS_LABEL)
+        entry_fecha_cierre.grid(column=1, row=1, padx=5, pady=5, sticky='w')
+        entry_fecha_cierre.insert(0, datetime.now().strftime('%Y-%m-%d'))
+        entry_fecha_cierre.configure(state=tk.DISABLED)
+
+        lbl_hora_cierre = CTkLabel(frame_formulario_cierre_caja, text="Hora de Inicio:", **ESTILO_ENTRYS_LABEL)
+        lbl_hora_cierre.grid(column=0, row=2, padx=5, pady=5, sticky='e')
+
+        entry_hora_cierre = CTkEntry(frame_formulario_cierre_caja, **ESTILO_ENTRYS_LABEL)
+        entry_hora_cierre.grid(column=1, row=2, padx=5, pady=5, sticky='w')
+        entry_hora_cierre.insert(0, datetime.now().strftime('%H:%M:%S'))
+        entry_hora_cierre.configure(state=tk.DISABLED)
+
+        lbl_usuario_logueado = CTkLabel(frame_formulario_cierre_caja, text="Usuario:", **ESTILO_ENTRYS_LABEL)
+        lbl_usuario_logueado.grid(column=0, row=3, padx=5, pady=5, sticky='e')
+
+        entry_usuario_logueado = CTkEntry(frame_formulario_cierre_caja, **ESTILO_ENTRYS_LABEL)
+        entry_usuario_logueado.grid(column=1, row=3, padx=5, pady=5, sticky='w')
+        entry_usuario_logueado.insert(0,"Administrador")
+        entry_usuario_logueado.configure(state=tk.DISABLED)
+
+       # Crear un Frame para contener el Treeview y el Scrollbar
+        tree_frame_movimientos = tk.Frame(frame_formulario_cierre_caja)
+        tree_frame_movimientos.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")  # Ajuste de columnspan a 2
+
+        # Configurar el estilo
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=("OCR A Extended", 10))
+        style.configure("mystyle.Treeview.Heading", font=("OCR A Extended", 9, "bold"))
+        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+
+        # Crear un Treeview en el frame con el estilo configurado
+        movimientos_treeview = ttk.Treeview(tree_frame_movimientos, style="mystyle.Treeview",height=4)
+        movimientos_treeview.grid(row=0, column=0, sticky="nsew")
+
+        # Configurar las columnas del Treeview
+        movimientos_treeview["columns"] = ("ID", "Tipo", "Fecha", "Hora", "Monto", "Usuario", "Detalles")
+        movimientos_treeview.heading("#0", text="ID", anchor="center")
+        movimientos_treeview.heading("ID", text="ID")
+        movimientos_treeview.heading("Tipo", text="Tipo")
+        movimientos_treeview.heading("Fecha", text="Fecha")
+        movimientos_treeview.heading("Hora", text="Hora")
+        movimientos_treeview.heading("Monto", text="Monto")
+        movimientos_treeview.heading("Usuario", text="Usuario")
+        movimientos_treeview.heading("Detalles", text="Detalles")
+
+        # Ajustar el ancho de las columnas
+        movimientos_treeview.column("#0", width=0, stretch=tk.NO)
+        movimientos_treeview.column("ID", width=0, stretch=tk.NO)
+        movimientos_treeview.column("Tipo", width=100, anchor="center")
+        movimientos_treeview.column("Fecha", width=100, anchor="center")
+        movimientos_treeview.column("Hora", width=100, anchor="center")
+        movimientos_treeview.column("Monto", width=100, anchor="center")
+        movimientos_treeview.column("Usuario", width=100, anchor="center")
+        movimientos_treeview.column("Detalles", width=150, anchor="center")
+        self.ver_movimientos_caja(movimientos_treeview)
+        
+        valor_inicio_caja = CTkLabel(frame_formulario_cierre_caja, text="Valor Inicial: ",**ESTILO_ENTRYS_LABEL)
+        valor_inicio_caja.grid(column=0,row=6,padx=5, pady=5, sticky='e')
+
+        lbl_total_entradas = CTkLabel(frame_formulario_cierre_caja,text="valor Total Entrada:",**ESTILO_ENTRYS_LABEL)
+        lbl_total_entradas.grid(column=0,row=7, padx=5, pady=5, sticky='e')
+
+        lbl_total_ventas_diarias = CTkLabel(frame_formulario_cierre_caja,text="Total Ventas Diarias:",**ESTILO_ENTRYS_LABEL)
+        lbl_total_ventas_diarias.grid(column=0,row=8, padx=5, pady=5, sticky='e')
+
+        lbl_total_salidas = CTkLabel(frame_formulario_cierre_caja,text="Valor  Total Salidas: ", **ESTILO_ENTRYS_LABEL)
+        lbl_total_salidas.grid(column=0,row=9, padx=5, pady=5, sticky='e')
+
+        valor_presente_caja = CTkLabel(frame_formulario_cierre_caja,**ESTILO_ENTRYS_LABEL)
+        valor_presente_caja.grid(column=0, row=10, padx=5, pady=5, sticky='w')
+
+        entry_valor_presente = tk.Entry(frame_formulario_cierre_caja,text="")
+        entry_valor_presente.grid_forget
+
+        lbl_valor_cierre = CTkLabel(frame_formulario_cierre_caja, text="Ingrese Valor de cierre:", **ESTILO_ENTRYS_LABEL)
+        lbl_valor_cierre.grid(column=0, row=11, padx=5, pady=5, sticky='e')
+
+        entry_valor_cierre = CTkEntry(frame_formulario_cierre_caja, placeholder_text="\uf53d", **ESTILO_ENTRYS_LABEL)
+        entry_valor_cierre.grid(column=1, row=11, padx=5, pady=5, sticky='w')
+        
+        entry_valor_cierre.bind("<Return>", lambda event: self.calculo_cierre(entry_valor_presente, entry_valor_cierre, informacion_final))
+        
+        self.actualizar_datos_cierre_jornada(lbl_total_salidas, lbl_total_entradas, lbl_total_ventas_diarias,valor_inicio_caja,
+                                             valor_presente_caja,entry_valor_presente)
+
+        btn_confirmar = CTkButton(frame_formulario_cierre_caja, text="Confirmar\ncierre de jornada", **ESTILO_CTKBOTONES)
+        btn_confirmar.grid(column=1, row=12, padx=5, pady=5)  
+
+        informacion_final = CTkLabel(frame_formulario_cierre_caja,text="",**ESTILO_ENTRYS_LABEL)
+        informacion_final.grid(column=0, row=12, padx=5, pady=5)
+        entry_valor_cierre.bind("<Return>", lambda event: self.calculo_cierre(entry_valor_presente, entry_valor_cierre, informacion_final))
+
+        
+    
+    
+    def actualizar_datos_cierre_jornada(self, lbl_total_salidas, lbl_total_entradas, lbl_total_ventas_diarias, valor_inicio_caja, 
+                                        valor_presente_caja,entry_valor_presente):
+        try:
+            conexion = sqlite3.connect('farmacia.db')
+            cursor = conexion.cursor()
+
+            # Obtener la fecha actual en formato YYYY-MM-DD
+            fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+            # Obtener el valor inicial de la caja para la fecha actual
+            cursor.execute("SELECT valor_inicial FROM operaciones_caja WHERE fecha_inicio = ?", (fecha_actual,))
+            valor_inicial = cursor.fetchone()[0] or 0.0
+
+            # Calcular el total de salidas para la fecha actual
+            cursor.execute("SELECT SUM(monto) FROM movimientos_caja WHERE fecha = ? AND tipo = ?", (fecha_actual, "Salida de dinero"))
+            total_salidas = cursor.fetchone()[0] or 0.0
+
+            # Calcular el total de entradas para la fecha actual
+            cursor.execute("SELECT SUM(monto) FROM movimientos_caja WHERE fecha = ? AND tipo = ?", (fecha_actual, "Entrada de dinero"))
+            total_entradas = cursor.fetchone()[0] or 0.0
+
+            # Calcular el total de ventas diarias
+            cursor.execute("SELECT SUM(total) FROM ventas WHERE fecha = ?", (fecha_actual,))
+            total_ventas_diarias = cursor.fetchone()[0] or 0.0
+
+            # Calcular el valor final de la caja
+            valor_final_caja = valor_inicial + total_entradas + total_ventas_diarias - total_salidas
+            valor_final_redondeado = round(valor_final_caja, 2)
+
+            # Actualizar los labels con los valores calculados
+            valor_inicio_caja.configure(text=f"Valor Inicio caja: $ {valor_inicial}")
+            lbl_total_salidas.configure(text=f"Valor Total Salidas: $ {total_salidas}")
+            lbl_total_entradas.configure(text=f"Valor Total Entradas: $ {total_entradas}")
+            lbl_total_ventas_diarias.configure(text=f"Total Ventas Diarias: $ {total_ventas_diarias}")
+            valor_presente_caja.configure(text=f"El valor que debe tener en caja es: $ {valor_final_redondeado}")
+            entry_valor_presente.insert(0, valor_final_redondeado)  # Insertar el nuevo valor
+            
+            conexion.commit()
+
+        except sqlite3.Error as e:
+            if conexion:
+                conexion.rollback()
+            messagebox.showerror("Error", f"No se pudo obtener los datos de cierre de jornada. Error: {str(e)}")
+
+        finally:
+            if conexion:
+                conexion.close()
+
+    def calculo_cierre(self, entry_valor_presente, entry_valor_cierre, informacion_final):
+        # Obtener los valores como cadenas de texto desde los widgets de entrada
+        valor_final_redondeado_str = entry_valor_presente.get()
+        valor_cierre_str = entry_valor_cierre.get()
+
+        try:
+            # Convertir las cadenas de texto a números decimales
+            valor_final_redondeado = float(valor_final_redondeado_str)
+            valor_cierre = float(valor_cierre_str)
+
+            # Calcular la diferencia entre los valores
+            diferencia = valor_cierre - valor_final_redondeado
+
+            # Determinar el mensaje según la diferencia
+            if diferencia < 0:
+                mensaje = f"Hay un faltante de caja de ${abs(diferencia)}."
+            elif diferencia > 0:
+                mensaje = f"Hay un superávit de caja de ${diferencia}."
+            else:
+                mensaje = "El cierre de caja coincide con el valor de cierre."
+
+            # Mostrar el mensaje en el widget informacion_final
+            informacion_final.configure(text=mensaje)
+
+        except ValueError:
+            # Manejar el caso en el que la conversión a decimal falle
+            messagebox.showerror("Error", "Por favor, ingrese números válidos en los campos de entrada.")
+
+
+    def formulario_movimientos_caja(self):
+        ESTILO_CTKBOTONES = {
+            'width': 50,
+            'height': 50,  # Ajustado para botones más grandes
+            'text_color': 'black',
+            'font': ("OCR A Extended", 13)
+        }
+    
+        ESTILO_ENTRYS_LABEL = {
+            'text_color': 'black',
+            'font': ("OCR A Extended", 14)
+        }
+        
+        ESTILO_TITULO = {
+            'font': ("OCR A Extended", 16, "bold")
+        }
+
+        # Crear una nueva ventana
+        self.movimientos_caja = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
+        self.movimientos_caja.title("Movimientos en la caja")
+        self.movimientos_caja.iconbitmap("./imagenes/logo.ico")
+        self.movimientos_caja.resizable(False, False)
+
+        # Crear el formulario dentro de la ventana
+        frame_formulario_movimientos = tk.Frame(self.movimientos_caja, background=COLOR_CUERPO_PRINCIPAL)
+        frame_formulario_movimientos.pack(padx=10, pady=10)
+
+        # Etiquetas y campos de entrada del formulario
+        lbl_titulo = CTkLabel(frame_formulario_movimientos, text="Movimientos caja", **ESTILO_TITULO)
+        lbl_titulo.grid(column=0, row=0, columnspan=2, pady=5)
+
+        lbl_fecha = CTkLabel(frame_formulario_movimientos, text="Fecha de Inicio:", **ESTILO_ENTRYS_LABEL)
+        lbl_fecha.grid(column=0, row=1, padx=5, pady=5, sticky='e')
+
+        entry_fecha = CTkEntry(frame_formulario_movimientos, **ESTILO_ENTRYS_LABEL)
+        entry_fecha.grid(column=1, row=1, padx=5, pady=5, sticky='w')
+        entry_fecha.insert(0, datetime.now().strftime('%Y-%m-%d'))
+        entry_fecha.configure(state=tk.DISABLED)
+
+        lbl_hora = CTkLabel(frame_formulario_movimientos, text="Hora de Inicio:", **ESTILO_ENTRYS_LABEL)
+        lbl_hora.grid(column=0, row=2, padx=5, pady=5, sticky='e')
+
+        entry_hora = CTkEntry(frame_formulario_movimientos, **ESTILO_ENTRYS_LABEL)
+        entry_hora.grid(column=1, row=2, padx=5, pady=5, sticky='w')
+        entry_hora.insert(0, datetime.now().strftime('%H:%M:%S'))
+        entry_hora.configure(state=tk.DISABLED)
+
+        lbl_usuario_logueado = CTkLabel(frame_formulario_movimientos, text="Usuario:", **ESTILO_ENTRYS_LABEL)
+        lbl_usuario_logueado.grid(column=0, row=3, padx=5, pady=5, sticky='e')
+
+        entry_usuario_logueado = CTkEntry(frame_formulario_movimientos, **ESTILO_ENTRYS_LABEL)
+        entry_usuario_logueado.grid(column=1, row=3, padx=5, pady=5, sticky='w')
+        entry_usuario_logueado.insert(0,"Administrador")
+        entry_usuario_logueado.configure(state=tk.DISABLED)
+
+        entry_tipo = CTkOptionMenu(frame_formulario_movimientos,values=["Salida de dinero", "Entrada de dinero"],**ESTILO_ENTRYS_LABEL)
+        entry_tipo.grid(column=0, row=6, padx=5, pady=5, sticky='e')
+
+        entry_monto = CTkEntry(frame_formulario_movimientos, placeholder_text="\uf53d", **ESTILO_ENTRYS_LABEL)
+        entry_monto.grid(column=1, row=6, padx=5, pady=5, sticky='w')
+
+        entry_detalles = CTkEntry(frame_formulario_movimientos, placeholder_text="Detalle el destino del dinero", **ESTILO_ENTRYS_LABEL)
+        entry_detalles.grid(column=0,row=7,padx=5, pady=5, sticky='w')
+
+        btn_confirmar = CTkButton(frame_formulario_movimientos, text="Confirmar\nmovimiento", **ESTILO_CTKBOTONES,
+                                  command=lambda: self.guardar_movimientos(entry_fecha,entry_hora,
+                                                                           entry_usuario_logueado,entry_tipo,entry_monto,entry_detalles))
+        btn_confirmar.grid(column=1, row=7, padx=5, pady=5,sticky='w') 
+
+       # Crear un Frame para contener el Treeview y el Scrollbar
+        tree_frame_movimientos = tk.Frame(self.movimientos_caja,background=COLOR_CUERPO_PRINCIPAL)
+        tree_frame_movimientos.pack(padx=5, pady=5)  # Ajuste de columnspan a 2
+
+        # Configurar el estilo
+        style = ttk.Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=("OCR A Extended", 10))
+        style.configure("mystyle.Treeview.Heading", font=("OCR A Extended", 9, "bold"))
+        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+
+        # Crear un Treeview en el frame con el estilo configurado
+        movimientos_treeview = ttk.Treeview(tree_frame_movimientos, style="mystyle.Treeview")
+        movimientos_treeview.grid(row=0, column=0, sticky="nsew")
+
+        # Configurar las columnas del Treeview
+        movimientos_treeview["columns"] = ("ID", "Tipo", "Fecha", "Hora", "Monto", "Usuario", "Detalles")
+        movimientos_treeview.heading("#0", text="ID", anchor="center")
+        movimientos_treeview.heading("ID", text="ID")
+        movimientos_treeview.heading("Tipo", text="Tipo")
+        movimientos_treeview.heading("Fecha", text="Fecha")
+        movimientos_treeview.heading("Hora", text="Hora")
+        movimientos_treeview.heading("Monto", text="Monto")
+        movimientos_treeview.heading("Usuario", text="Usuario")
+        movimientos_treeview.heading("Detalles", text="Detalles")
+
+        # Ajustar el ancho de las columnas
+        movimientos_treeview.column("#0", width=0, stretch=tk.NO)
+        movimientos_treeview.column("ID", width=0, stretch=tk.NO)
+        movimientos_treeview.column("Tipo", width=100, anchor="center")
+        movimientos_treeview.column("Fecha", width=100, anchor="center")
+        movimientos_treeview.column("Hora", width=100, anchor="center")
+        movimientos_treeview.column("Monto", width=100, anchor="center")
+        movimientos_treeview.column("Usuario", width=100, anchor="center")
+        movimientos_treeview.column("Detalles", width=150, anchor="center")
+        self.ver_movimientos_caja(movimientos_treeview)
+
+        boton_eliminar_movimientos = CTkButton(tree_frame_movimientos,text="Eliminar movimiento",**ESTILO_CTKBOTONES,
+                                               command=lambda:self.eliminar_movimiento_caja(movimientos_treeview))
+        boton_eliminar_movimientos.grid(column=0,row=1,padx=10,pady=10)
+
+    def guardar_movimientos(self, entry_fecha, entry_hora, entry_usuario_logueado, entry_tipo, entry_monto, entry_detalles):
+        try:
+            conexion = sqlite3.connect('farmacia.db')
+            cursor = conexion.cursor()
+
+            # Obtener la fecha actual
+            fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+            # Verificar si hay una jornada en curso para la fecha actual
+            cursor.execute("SELECT * FROM operaciones_caja WHERE fecha_inicio = ? AND estado = ?", (fecha_actual, "Jornada en curso"))
+            jornada_en_curso = cursor.fetchone()
+
+            if not jornada_en_curso:
+                messagebox.showwarning("Aviso", "No hay una jornada en curso para el día de hoy. Por favor, inicie operaciones.")
+                return
+
+            id_movimiento = self.generar_codigo_aleatorio()
+            fecha = entry_fecha.get()
+            hora = entry_hora.get()
+            usuario = entry_usuario_logueado.get()
+            tipo = entry_tipo.get()
+            monto = float(entry_monto.get())
+            detalles = entry_detalles.get()
+
+            cursor.execute('''INSERT INTO movimientos_caja
+                            (id, tipo, fecha, hora, monto, usuario, detalles)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)''', 
+                            (id_movimiento, tipo, fecha, hora, monto, usuario, detalles))
+            conexion.commit()
+
+            messagebox.showinfo("Operación exitosa", "El movimiento se ha guardado correctamente.")
+
+        except sqlite3.Error as e:
+            if conexion:
+                conexion.rollback()
+            messagebox.showerror("Error", f"No se pudo guardar el movimiento. Error: {str(e)}")
+
+        finally:
+            if conexion:
+                conexion.close()
+    
+    def ver_movimientos_caja(self, movimientos_treeview):
+        try:
+            conexion = sqlite3.connect('farmacia.db')
+            cursor = conexion.cursor()
+
+            # Obtener la fecha actual en formato YYYY-MM-DD
+            fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+            # Obtener los movimientos de caja del día en curso, excluyendo la columna 'id'
+            cursor.execute('''SELECT id,tipo, fecha, hora, monto, usuario, detalles 
+                            FROM movimientos_caja 
+                            WHERE fecha = ?''', (fecha_actual,))
+            movimientos = cursor.fetchall()
+
+            # Limpiar el Treeview
+            for record in movimientos_treeview.get_children():
+                movimientos_treeview.delete(record)
+
+            # Insertar los movimientos en el Treeview
+            for movimiento in movimientos:
+                movimientos_treeview.insert('', 'end', values=movimiento)
+
+            conexion.commit()
+
+        except sqlite3.Error as e:
+            if conexion:
+                conexion.rollback()
+            messagebox.showerror("Error", f"No se pudo obtener los movimientos. Error: {str(e)}")
+
+        finally:
+            if conexion:
+                conexion.close()  
+
+    def eliminar_movimiento_caja(self, movimientos_treeview):
+        # Obtener el item seleccionado en el Treeview
+        seleccion = movimientos_treeview.selection()
+
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Por favor selecciona un movimiento para eliminar.")
+            return
+
+        # Obtener el ID del movimiento seleccionado
+        id_movimiento = movimientos_treeview.item(seleccion, 'values')[0]
+        print(id_movimiento)
+
+        try:
+            conexion = sqlite3.connect('farmacia.db')
+            cursor = conexion.cursor()
+
+            # Eliminar el movimiento de la base de datos
+            cursor.execute("DELETE FROM movimientos_caja WHERE id = ?", (id_movimiento,))
+            conexion.commit()
+
+            # Eliminar el movimiento del Treeview
+            movimientos_treeview.delete(seleccion)
+
+            messagebox.showinfo("Éxito", "El movimiento se ha eliminado correctamente.")
+
+        except sqlite3.Error as e:
+            if conexion:
+                conexion.rollback()
+            messagebox.showerror("Error", f"No se pudo eliminar el movimiento. Error: {str(e)}")
+
+        finally:
+            if conexion:
+                conexion.close()
+
+    
+
+                           
+
+
+
+
 
 
 #------------------FUNCIONES PARA EL HISTORIAL DE VENTAS ----------------------------------------------------
@@ -1522,7 +2093,7 @@ class FormularioMaestroDesing(tk.Tk):
         
         frame_calendario = tk.Frame(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         frame_calendario.pack(fill="both", padx=10, pady=10, expand=True)
-    
+
         cal = Calendar(frame_calendario, font=("OCR A Extended", 12), selectmode='day', locale='es_ES', disabledforeground="#858585",
                     cursor="hand2", background="#2A3138",
                     selectbackground="#3B8ED0")
@@ -1534,7 +2105,7 @@ class FormularioMaestroDesing(tk.Tk):
         style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('OCR A Extended', 9))
         style.configure("mystyle.Treeview.Heading", font=('OCR A Extended', 10, 'bold'))
         
-        treeview_historial_ventas = ttk.Treeview(frame_calendario, columns=("ID", "ID Producto", "Producto", "ID Cliente",
+        treeview_historial_ventas = ttk.Treeview(frame_calendario, columns=("ID", "ID Producto","Categoria producto", "Producto", "ID Cliente",
                                                                             "Cliente","Cantidad", "Precio Unitario", "Total", 
                                                                             "Método de Pago", "Fecha", "Hora"), style="mystyle.Treeview", show="headings")
         treeview_historial_ventas.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1544,6 +2115,7 @@ class FormularioMaestroDesing(tk.Tk):
         treeview_historial_ventas.column("ID Cliente", width=0, stretch=FALSE)
         
         treeview_historial_ventas.column("Producto", width=70)
+        treeview_historial_ventas.column("Categoria producto", width=70)
         treeview_historial_ventas.column("Cliente", width=70)
         treeview_historial_ventas.column("Cantidad", width=10, anchor="center")
         treeview_historial_ventas.column("Precio Unitario", width=10, anchor="center")
@@ -1555,6 +2127,7 @@ class FormularioMaestroDesing(tk.Tk):
         # Configurar encabezados del Treeview
         treeview_historial_ventas.heading("ID", text="ID")
         treeview_historial_ventas.heading("ID Producto", text="ID Producto")
+        treeview_historial_ventas.heading("Categoria producto", text="Categoria")
         treeview_historial_ventas.heading("Producto", text="Producto")
         treeview_historial_ventas.heading("ID Cliente", text="ID Cliente")
         treeview_historial_ventas.heading("Cliente", text="Cliente")
@@ -1615,6 +2188,7 @@ class FormularioMaestroDesing(tk.Tk):
 
                 # Obtener la fecha actual
                 current_date = datetime.now().date()
+                print(current_date)
 
                 # Actualizar el total de ventas diarias
                 self.load_sales(current_date, current_date, treeview_historial_ventas, total_diario_ventas)
@@ -1648,7 +2222,7 @@ class FormularioMaestroDesing(tk.Tk):
         # Realizar consulta en la base de datos para obtener las ventas del día seleccionado
         conn = sqlite3.connect('farmacia.db')
         c = conn.cursor()
-        c.execute("SELECT * FROM ventas WHERE fecha BETWEEN ? AND ?", (start_date, end_date))
+        c.execute("SELECT * FROM ventas WHERE fecha >= ? AND fecha < ?", (start_date, end_date))
         sales = c.fetchall()
         
         # Calcular el total de las ventas diarias
@@ -1662,8 +2236,7 @@ class FormularioMaestroDesing(tk.Tk):
         # Mostrar las ventas en el Treeview
         for sale in sales:
             treeview_historial_ventas.insert('', 'end', values=sale)
-        self.generar_grafico_barras(sales)
-
+    
     def generar_grafico_barras(self, data):
         productos = [sale[1] for sale in data]
         cantidades = [sale[2] for sale in data]
@@ -1684,9 +2257,26 @@ class FormularioMaestroDesing(tk.Tk):
 
        # canvas.get_tk_widget().configure(yscrollcommand=None, xscrollcommand=None)
     
+
+
+
         
 
 
+
+
+#----------clase parpadeo etiqueta--------------------------------------------------------
+
+class ParpadeoEtiqueta(tk.Label):
+    def __init__(self, parent, text, *args, **kwargs):
+        tk.Label.__init__(self, parent, text=text,background=COLOR_CUERPO_PRINCIPAL, *args, **kwargs)
+        self.parpadear()
+
+    def parpadear(self):
+        current_color = self.cget("foreground")
+        new_color = "red" if current_color == "black" else "black"
+        self.config(foreground=new_color)
+        self.after(500, self.parpadear)  # Cambia el valor de 500 para ajustar la velocidad del parpadeo
 """"
 
 #------------------------FUNCIONES PARA CLIENTE-------------------------------
@@ -1951,10 +2541,20 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS productos (
                     codigo_barras TEXT        
                 )''')
 
+cursor.execute('''CREATE TABLE IF NOT EXISTS usuarios (
+                    id TEXT PRIMARY KEY,
+                    nombre TEXT NOT NULL,
+                    password TEXT,
+                    rol TEXT,
+                    estado REAL
+                )''')
+
+
 # Crear la tabla de ventas
 cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     id TEXT PRIMARY KEY,
                     id_producto TEXT,
+                    categoria_producto TEXT,
                     producto TEXT,
                     id_cliente TEXT,
                     cliente TEXT,
@@ -1964,7 +2564,6 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS ventas (
                     metodo_pago TEXT,
                     fecha DATE,
                     hora TIME,
-                    categoria_producto TEXT,
                     FOREIGN KEY (id_producto) REFERENCES productos (id)
                 )''')
 
@@ -1996,6 +2595,33 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS datos_negocio (
                     telefono TEXT,
                     Email TEXT
                 )''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS operaciones_caja (
+                    id TEXT PRIMARY KEY,
+                    fecha_inicio DATE,
+                    hora_inicio TIME,
+                    fecha_final DATE,
+                    hora_final TIME,
+                    usuario TEXT,
+                    estado TEXT,
+                    valor_inicial REAL,
+                    valor_cierre REAL,
+                    comentarios TEXT,
+                    detalles_movimientos TEXT,
+                    detalles_transacciones TEXT
+                )''')
+
+# Crear la tabla de movimientos caja
+cursor.execute('''CREATE TABLE IF NOT EXISTS movimientos_caja (
+                    id TEXT PRIMARY KEY,
+                    tipo TEXT NOT NULL,
+                    fecha DATE,
+                    hora TIME,
+                    monto REAL,
+                    usuario TEXT,
+                    detalles TEXT
+                )''')
+
 
 # Guardar cambios y cerrar la conexión
 conn.commit()
