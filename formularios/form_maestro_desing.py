@@ -823,7 +823,11 @@ class FormularioMaestroDesing(tk.Tk):
         etiqueta_estado_operaciones = ParpadeoEtiqueta(botones_accesos_rapidos,text="",font=("OCR A Extended",16))
         etiqueta_estado_operaciones.grid(column=5,row=0, padx=10, pady=10)
         self.estado_etiqueta_parapadeo(etiqueta_estado_operaciones)
-        
+
+        mostrar_hora_fecha = ParpadeoEtiqueta(botones_accesos_rapidos, text="", font=("OCR A Extended", 16))
+        mostrar_hora_fecha.grid(column=6, row=0, padx=10, pady=10)
+        self.actualizar_etiqueta_fecha_hora(mostrar_hora_fecha)
+                
         
                 # Entry para ingresar el término de búsqueda
         entry_busqueda_producto = CTkEntry(filtrado_productos_venta, bg_color=COLOR_CUERPO_PRINCIPAL, width=300, 
@@ -1025,14 +1029,31 @@ class FormularioMaestroDesing(tk.Tk):
                                        font=("OCR A Extended", 15))
         lbl_vuelto.grid(column=7,row=2,padx=5,pady=5)
 
+    def actualizar_etiqueta_fecha_hora(self, mostrar_hora_fecha):
+        def actualizar():
+            # Obtener la fecha y hora actual
+            fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Actualizar el texto de la etiqueta
+            mostrar_hora_fecha.config(text=fecha_actual)
+
+            # Esperar un segundo antes de actualizar nuevamente
+            mostrar_hora_fecha.after(1000, actualizar)
+
+        # Iniciar el proceso de actualización
+        actualizar()
+
     def estado_etiqueta_parapadeo(self, etiqueta_estado_operaciones):
         # Abrir una nueva conexión a la base de datos
         conn = sqlite3.connect('farmacia.db')
         cursor = conn.cursor()
 
         try:
-            # Obtener el estado de la tabla operaciones_caja
-            cursor.execute("SELECT estado FROM operaciones_caja")
+            # Obtener la fecha actual
+            fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+            # Obtener el estado de la fila correspondiente al día e)n curso
+            cursor.execute("SELECT estado FROM operaciones_caja WHERE fecha_inicio = ?", (fecha_actual,))
             estado_operaciones = cursor.fetchone()
 
             # Verificar si se recuperó el estado
@@ -1040,13 +1061,14 @@ class FormularioMaestroDesing(tk.Tk):
                 estado = estado_operaciones[0]
                 etiqueta_estado_operaciones.config(text=estado)
             else:
-                etiqueta_estado_operaciones.config(text="No hay registros en la tabla operaciones_caja")
+                etiqueta_estado_operaciones.config(text="No se ha iniciado la jornada")
         except sqlite3.Error as e:
             print("Error al ejecutar la consulta SQL:", e)
         finally:
             # Cerrar el cursor y la conexión
             cursor.close()
             conn.close()
+     
 
 
   
@@ -1852,25 +1874,6 @@ class FormularioMaestroDesing(tk.Tk):
                 messagebox.showinfo("Éxito", "Cierre de caja confirmado y actualizado.")
         else:
             messagebox.showinfo("Aviso", "No existe una jornada iniciada para el día de hoy.")
-
-    def obtener_id_mov_ven(self):
-        conn = sqlite3.connect('farmacia.db')
-        cursor = conn.cursor()
-
-        # Obtener la fecha actual
-        fecha_actual = datetime.now().date()
-
-        # Obtener IDs de movimientos de caja del día en curso
-        cursor.execute('''SELECT id FROM movimientos_caja WHERE fecha = ?''', (fecha_actual,))
-        ids_movimientos_caja = cursor.fetchall()
-
-        # Obtener IDs de ventas del día en curso
-        cursor.execute('''SELECT id FROM ventas WHERE fecha = ?''', (fecha_actual,))
-        ids_ventas = cursor.fetchall()
-
-        conn.close()
-
-        return ids_movimientos_caja, ids_ventas
 
     def obtener_id_mov_ven(self):
         conn = sqlite3.connect('farmacia.db')
