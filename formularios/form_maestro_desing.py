@@ -754,8 +754,8 @@ class FormularioMaestroDesing(tk.Tk):
             self.informe_treeview.delete(item)
 
         # Conectar a la base de datos
-        conexion = sqlite3.connect('farmacia.db')
-        cursor = conexion.cursor()
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
 
         # Realizar la consulta SQL para seleccionar productos con existencias por debajo del stock mínimo
         cursor.execute("SELECT id, nombre, existencias, stock_minimo FROM productos WHERE existencias < stock_minimo")
@@ -766,7 +766,7 @@ class FormularioMaestroDesing(tk.Tk):
             self.informe_treeview.insert("", "end", values=(producto[1], producto[2]))
 
         # Cerrar la conexión con la base de datos
-        conexion.close()
+        conn.close()
 
 #---------------------FUNCIONES PARA VENTAS--------------------------------
 
@@ -820,10 +820,12 @@ class FormularioMaestroDesing(tk.Tk):
                                            text_color='black',font=("OCR A Extended",12),command=lambda: self.formulario_movimientos_caja())
         boton_movimientos_caja.grid(column=4,row=0, padx=10, pady=10)
 
-        etiqueta_estado_operaciones = ParpadeoEtiqueta(botones_accesos_rapidos,text="JORNADA EN CURSO",font=("OCR A Extended",16))
+        etiqueta_estado_operaciones = ParpadeoEtiqueta(botones_accesos_rapidos,text="",font=("OCR A Extended",16))
         etiqueta_estado_operaciones.grid(column=5,row=0, padx=10, pady=10)
-
-        # Entry para ingresar el término de búsqueda
+        self.estado_etiqueta_parapadeo(etiqueta_estado_operaciones)
+        
+        
+                # Entry para ingresar el término de búsqueda
         entry_busqueda_producto = CTkEntry(filtrado_productos_venta, bg_color=COLOR_CUERPO_PRINCIPAL, width=300, 
                                         placeholder_text="\uf02a Ingrese Cod barras, Nombre o Descripcion",font=("OCR A Extended",14))
         entry_busqueda_producto.grid(column=0, row=0, padx=(10, 5), pady=10, sticky='ew')
@@ -1022,7 +1024,32 @@ class FormularioMaestroDesing(tk.Tk):
         lbl_vuelto = CTkLabel(detalles_acciones,text="No hay\nventa registrada.",width=70, height=50, text_color='black',
                                        font=("OCR A Extended", 15))
         lbl_vuelto.grid(column=7,row=2,padx=5,pady=5)
-        
+
+    def estado_etiqueta_parapadeo(self, etiqueta_estado_operaciones):
+        # Abrir una nueva conexión a la base de datos
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
+
+        try:
+            # Obtener el estado de la tabla operaciones_caja
+            cursor.execute("SELECT estado FROM operaciones_caja")
+            estado_operaciones = cursor.fetchone()
+
+            # Verificar si se recuperó el estado
+            if estado_operaciones:
+                estado = estado_operaciones[0]
+                etiqueta_estado_operaciones.config(text=estado)
+            else:
+                etiqueta_estado_operaciones.config(text="No hay registros en la tabla operaciones_caja")
+        except sqlite3.Error as e:
+            print("Error al ejecutar la consulta SQL:", e)
+        finally:
+            # Cerrar el cursor y la conexión
+            cursor.close()
+            conn.close()
+
+
+  
     def calcular_vuelto(self, event, lbl_total_venta, entry_valor_recibido, lbl_vuelto):
         # Obtener el texto del total de la venta
         total_venta_text = lbl_total_venta.cget("text")
@@ -1541,8 +1568,8 @@ class FormularioMaestroDesing(tk.Tk):
 
         }
         
-        conexion = sqlite3.connect('farmacia.db')
-        cursor = conexion.cursor()
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
 
         # Verificar si ya existe un registro para la fecha actual
         fecha_actual = datetime.now().strftime('%Y-%m-%d')
@@ -1617,8 +1644,8 @@ class FormularioMaestroDesing(tk.Tk):
     def guardar_operacion(self, entry_id_inicio_operaciones, entry_fecha_inicio, entry_hora_inicio, entry_usuario_logueado, entry_valor_inicial,entry_estado_inicial):
         try:
             # Conexión a la base de datos
-            conexion = sqlite3.connect('farmacia.db')
-            cursor = conexion.cursor()
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
             # Obtener los valores ingresados por el usuario
             id_inicio_operaciones = entry_id_inicio_operaciones.get()
@@ -1634,21 +1661,21 @@ class FormularioMaestroDesing(tk.Tk):
                             VALUES (?, ?, ?, ?, ?,?)''', 
                             (id_inicio_operaciones, fecha_inicio, hora_inicio, usuario, float(valor_inicial),estado_inicial))
             
-            conexion.commit()  # Confirmar la transacción
+            conn.commit()  # Confirmar la transacción
 
             # Mostrar un mensaje de confirmación
             messagebox.showinfo("Operación Exitosa", "Los datos se han guardado correctamente.")
 
         except Exception as e:
             # En caso de error, deshacer cualquier cambio en la base de datos
-            conexion.rollback()
+            conn.rollback()
             # Mostrar un mensaje de error
             messagebox.showerror("Error", f"No se pudo guardar la operación. Error: {str(e)}")
 
         finally:
             # Cerrar la conexión a la base de datos
-            if conexion:
-                conexion.close()
+            if conn:
+                conn.close()
 
     def formulario_cierre_caja(self):
         ESTILO_CTKBOTONES = {
@@ -1770,22 +1797,105 @@ class FormularioMaestroDesing(tk.Tk):
         
         self.actualizar_datos_cierre_jornada(lbl_total_salidas, lbl_total_entradas, lbl_total_ventas_diarias,valor_inicio_caja,
                                              valor_presente_caja,entry_valor_presente)
-
-        btn_confirmar = CTkButton(frame_formulario_cierre_caja, text="Confirmar\ncierre de jornada", **ESTILO_CTKBOTONES)
+        
+  
+        btn_confirmar = CTkButton(frame_formulario_cierre_caja, text="Confirmar\ncierre de jornada",**ESTILO_CTKBOTONES,
+                                  command=lambda:self.confirmar_cierre_caja(entry_fecha_cierre, entry_hora_cierre, entry_valor_cierre, entry_informacion_final))
         btn_confirmar.grid(column=1, row=12, padx=5, pady=5)  
 
         informacion_final = CTkLabel(frame_formulario_cierre_caja,text="",**ESTILO_ENTRYS_LABEL)
         informacion_final.grid(column=0, row=12, padx=5, pady=5)
-        entry_valor_cierre.bind("<Return>", lambda event: self.calculo_cierre(entry_valor_presente, entry_valor_cierre, informacion_final))
 
+        entry_informacion_final=tk.Entry(frame_formulario_cierre_caja,text="")
+        entry_informacion_final.grid_forget
         
-    
-    
+        entry_valor_cierre.bind('<KeyRelease>', lambda event: self.calculo_cierre(entry_valor_presente, entry_valor_cierre, informacion_final,entry_informacion_final))
+
+    def confirmar_cierre_caja(self, entry_fecha_cierre, entry_hora_cierre, entry_valor_cierre, entry_informacion_final):
+        fecha_final = entry_fecha_cierre.get()
+        hora_final = entry_hora_cierre.get()
+        estado = "jornada finalizada"
+        valor_cierre = entry_valor_cierre.get()
+        comentarios = entry_informacion_final.get()
+
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
+
+        # Obtener la fecha actual
+        fecha_actual = datetime.now().date()
+
+        # Verificar si ya existe una fila con la fecha de inicio como el día en curso
+        cursor.execute('''SELECT estado FROM operaciones_caja WHERE fecha_inicio = ?''', (fecha_actual,))
+        resultado = cursor.fetchone()
+
+        if resultado is not None:  # Si se encuentra una fila con la fecha de inicio actual
+            estado_existente = resultado[0]
+            if estado_existente == "jornada finalizada":
+                messagebox.showinfo("Aviso", "La jornada ya está cerrada. No se puede confirmar el cierre nuevamente.")
+                conn.close()
+                return
+            else:
+                # Obtener IDs de movimientos de caja y ventas
+                ids_movimientos_caja, ids_ventas = self.obtener_id_mov_ven()
+
+                # Convertir las listas de IDs en cadenas separadas por comas
+                detalles_movimientos = ",".join(map(str, ids_movimientos_caja))
+                detalles_transacciones = ",".join(map(str, ids_ventas))
+
+                cursor.execute('''UPDATE operaciones_caja SET
+                                    fecha_final = ?, hora_final = ?, estado = ?, valor_cierre = ?, comentarios = ?,
+                                    detalles_movimientos = ?, detalles_transacciones = ?
+                                    WHERE fecha_inicio = ?''', 
+                                    (fecha_final, hora_final, estado, valor_cierre, comentarios, detalles_movimientos, detalles_transacciones, fecha_actual))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Éxito", "Cierre de caja confirmado y actualizado.")
+        else:
+            messagebox.showinfo("Aviso", "No existe una jornada iniciada para el día de hoy.")
+
+    def obtener_id_mov_ven(self):
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
+
+        # Obtener la fecha actual
+        fecha_actual = datetime.now().date()
+
+        # Obtener IDs de movimientos de caja del día en curso
+        cursor.execute('''SELECT id FROM movimientos_caja WHERE fecha = ?''', (fecha_actual,))
+        ids_movimientos_caja = cursor.fetchall()
+
+        # Obtener IDs de ventas del día en curso
+        cursor.execute('''SELECT id FROM ventas WHERE fecha = ?''', (fecha_actual,))
+        ids_ventas = cursor.fetchall()
+
+        conn.close()
+
+        return ids_movimientos_caja, ids_ventas
+
+    def obtener_id_mov_ven(self):
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
+
+        # Obtener la fecha actual
+        fecha_actual = datetime.now().date()
+
+        # Obtener IDs de movimientos de caja del día en curso
+        cursor.execute('''SELECT id FROM movimientos_caja WHERE fecha = ?''', (fecha_actual,))
+        ids_movimientos_caja = cursor.fetchall()
+
+        # Obtener IDs de ventas del día en curso
+        cursor.execute('''SELECT id FROM ventas WHERE fecha = ?''', (fecha_actual,))
+        ids_ventas = cursor.fetchall()
+
+        conn.close()
+
+        return ids_movimientos_caja, ids_ventas
+
     def actualizar_datos_cierre_jornada(self, lbl_total_salidas, lbl_total_entradas, lbl_total_ventas_diarias, valor_inicio_caja, 
                                         valor_presente_caja,entry_valor_presente):
         try:
-            conexion = sqlite3.connect('farmacia.db')
-            cursor = conexion.cursor()
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
             # Obtener la fecha actual en formato YYYY-MM-DD
             fecha_actual = datetime.now().strftime('%Y-%m-%d')
@@ -1818,18 +1928,18 @@ class FormularioMaestroDesing(tk.Tk):
             valor_presente_caja.configure(text=f"El valor que debe tener en caja es: $ {valor_final_redondeado}")
             entry_valor_presente.insert(0, valor_final_redondeado)  # Insertar el nuevo valor
             
-            conexion.commit()
+            conn.commit()
 
         except sqlite3.Error as e:
-            if conexion:
-                conexion.rollback()
+            if conn:
+                conn.rollback()
             messagebox.showerror("Error", f"No se pudo obtener los datos de cierre de jornada. Error: {str(e)}")
 
         finally:
-            if conexion:
-                conexion.close()
+            if conn:
+                conn.close()
 
-    def calculo_cierre(self, entry_valor_presente, entry_valor_cierre, informacion_final):
+    def calculo_cierre(self, entry_valor_presente, entry_valor_cierre, informacion_final,entry_informacion_final):
         # Obtener los valores como cadenas de texto desde los widgets de entrada
         valor_final_redondeado_str = entry_valor_presente.get()
         valor_cierre_str = entry_valor_cierre.get()
@@ -1841,22 +1951,23 @@ class FormularioMaestroDesing(tk.Tk):
 
             # Calcular la diferencia entre los valores
             diferencia = valor_cierre - valor_final_redondeado
-
+            diferencia_red=round(diferencia, 2)
             # Determinar el mensaje según la diferencia
             if diferencia < 0:
-                mensaje = f"Hay un faltante de caja de ${abs(diferencia)}."
+               mensaje = f"Hay un faltante de caja de ${abs(diferencia_red)}. \nPuedes cerrar caja con un faltante, \nRecuerda que una buena organización es \nfundamental para el éxito del negocio."
             elif diferencia > 0:
-                mensaje = f"Hay un superávit de caja de ${diferencia}."
+                mensaje = f"Hay un superávit de caja de ${diferencia_red}. \nPuedes cerrar caja con un superávit, \nRecuerda que una buena organización es \nfundamental para el éxito del negocio."
+
             else:
-                mensaje = "El cierre de caja coincide con el valor de cierre."
+                mensaje = "El cierre de caja coincide\ncon el valor de cierre, gran trabajo!"
 
             # Mostrar el mensaje en el widget informacion_final
             informacion_final.configure(text=mensaje)
+            entry_informacion_final.insert(0, mensaje)
 
         except ValueError:
             # Manejar el caso en el que la conversión a decimal falle
             messagebox.showerror("Error", "Por favor, ingrese números válidos en los campos de entrada.")
-
 
     def formulario_movimientos_caja(self):
         ESTILO_CTKBOTONES = {
@@ -1969,8 +2080,8 @@ class FormularioMaestroDesing(tk.Tk):
 
     def guardar_movimientos(self, entry_fecha, entry_hora, entry_usuario_logueado, entry_tipo, entry_monto, entry_detalles):
         try:
-            conexion = sqlite3.connect('farmacia.db')
-            cursor = conexion.cursor()
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
             # Obtener la fecha actual
             fecha_actual = datetime.now().strftime('%Y-%m-%d')
@@ -1995,23 +2106,23 @@ class FormularioMaestroDesing(tk.Tk):
                             (id, tipo, fecha, hora, monto, usuario, detalles)
                             VALUES (?, ?, ?, ?, ?, ?, ?)''', 
                             (id_movimiento, tipo, fecha, hora, monto, usuario, detalles))
-            conexion.commit()
+            conn.commit()
 
             messagebox.showinfo("Operación exitosa", "El movimiento se ha guardado correctamente.")
 
         except sqlite3.Error as e:
-            if conexion:
-                conexion.rollback()
+            if conn:
+                conn.rollback()
             messagebox.showerror("Error", f"No se pudo guardar el movimiento. Error: {str(e)}")
 
         finally:
-            if conexion:
-                conexion.close()
+            if conn:
+                conn.close()
     
     def ver_movimientos_caja(self, movimientos_treeview):
         try:
-            conexion = sqlite3.connect('farmacia.db')
-            cursor = conexion.cursor()
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
             # Obtener la fecha actual en formato YYYY-MM-DD
             fecha_actual = datetime.now().strftime('%Y-%m-%d')
@@ -2030,16 +2141,16 @@ class FormularioMaestroDesing(tk.Tk):
             for movimiento in movimientos:
                 movimientos_treeview.insert('', 'end', values=movimiento)
 
-            conexion.commit()
+            conn.commit()
 
         except sqlite3.Error as e:
-            if conexion:
-                conexion.rollback()
+            if conn:
+                conn.rollback()
             messagebox.showerror("Error", f"No se pudo obtener los movimientos. Error: {str(e)}")
 
         finally:
-            if conexion:
-                conexion.close()  
+            if conn:
+                conn.close()  
 
     def eliminar_movimiento_caja(self, movimientos_treeview):
         # Obtener el item seleccionado en el Treeview
@@ -2054,12 +2165,12 @@ class FormularioMaestroDesing(tk.Tk):
         print(id_movimiento)
 
         try:
-            conexion = sqlite3.connect('farmacia.db')
-            cursor = conexion.cursor()
+            conn = sqlite3.connect('farmacia.db')
+            cursor = conn.cursor()
 
             # Eliminar el movimiento de la base de datos
             cursor.execute("DELETE FROM movimientos_caja WHERE id = ?", (id_movimiento,))
-            conexion.commit()
+            conn.commit()
 
             # Eliminar el movimiento del Treeview
             movimientos_treeview.delete(seleccion)
@@ -2067,13 +2178,13 @@ class FormularioMaestroDesing(tk.Tk):
             messagebox.showinfo("Éxito", "El movimiento se ha eliminado correctamente.")
 
         except sqlite3.Error as e:
-            if conexion:
-                conexion.rollback()
+            if conn:
+                conn.rollback()
             messagebox.showerror("Error", f"No se pudo eliminar el movimiento. Error: {str(e)}")
 
         finally:
-            if conexion:
-                conexion.close()
+            if conn:
+                conn.close()
 
     
 
@@ -2389,9 +2500,9 @@ class ParpadeoEtiqueta(tk.Label):
             'width': 200      
         }
 
-        global conexion, cursor
-        conexion = sqlite3.connect('farmacia.db')
-        cursor = conexion.cursor()
+        global conn, cursor
+        conn = sqlite3.connect('farmacia.db')
+        cursor = conn.cursor()
         for widget in self.cuerpo_principal.winfo_children():
             widget.destroy()
 
@@ -2399,7 +2510,7 @@ class ParpadeoEtiqueta(tk.Label):
             caracteres = string.ascii_letters + string.digits
             return ''.join(random.choice(caracteres) for _ in range(8))
 
-        def insertar_datos(conexion):
+        def insertar_datos(conn):
             try:
                 # Obtener los valores de los campos de entrada
                 datos = (nombre_negocio.get(), ruc.get(), direccion.get(), telefono.get(), email.get())
@@ -2415,7 +2526,7 @@ class ParpadeoEtiqueta(tk.Label):
                     # Si ya hay un registro, actualizarlo
                     cursor.execute('UPDATE datos_negocio SET nombre_negocio=?, ruc=?, direccion=?, telefono=?, email=?', datos)
 
-                conexion.commit()
+                conn.commit()
                 mostrar_datos_actuales()
                 messagebox.showinfo("Éxito", "Los datos se han guardado correctamente.")
             except Exception as e:
@@ -2493,7 +2604,7 @@ class ParpadeoEtiqueta(tk.Label):
         email.grid(row=5, column=1, padx=5, pady=5, sticky="w")
         
         # Botón para guardar los datos
-        btn_guardar = CTkButton(frame_formulario, text="Guardar Datos", **ESTILO_CTKBOTONES_DATOS_NEGO, command=lambda: insertar_datos(conexion))
+        btn_guardar = CTkButton(frame_formulario, text="Guardar Datos", **ESTILO_CTKBOTONES_DATOS_NEGO, command=lambda: insertar_datos(conn))
         btn_guardar.grid(row=6, columnspan=2, padx=5, pady=5)
         
         # Crear etiquetas para mostrar los datos actuales del negocio
