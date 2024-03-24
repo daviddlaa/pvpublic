@@ -1068,10 +1068,7 @@ class FormularioMaestroDesing(tk.Tk):
             # Cerrar el cursor y la conexión
             cursor.close()
             conn.close()
-     
-
-
-  
+       
     def calcular_vuelto(self, event, lbl_total_venta, entry_valor_recibido, lbl_vuelto):
         # Obtener el texto del total de la venta
         total_venta_text = lbl_total_venta.cget("text")
@@ -1603,12 +1600,16 @@ class FormularioMaestroDesing(tk.Tk):
             return
     
         
+      # Calcular las coordenadas x e y para la posición deseada
+        x = 600  # Por ejemplo, coordenada x deseada
+        y = 100  # Por ejemplo, coordenada y deseada
+
         # Crear una nueva ventana
-        self.inicio_operaciones = tk.Toplevel(self.cuerpo_principal,background=COLOR_CUERPO_PRINCIPAL)
+        self.inicio_operaciones = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         self.inicio_operaciones.title("Inicio de Operaciones")
         self.inicio_operaciones.iconbitmap("./imagenes/logo.ico")
-        #self.inicio_operaciones.geometry("400x300")
         self.inicio_operaciones.resizable(False, False)
+        self.inicio_operaciones.geometry(f"+{x}+{y}")  # Establecer solo posición
 
         # Crear el formulario dentro de la ventana
         frame_formulario_inicio_operaciones = tk.Frame(self.inicio_operaciones,background=COLOR_CUERPO_PRINCIPAL)
@@ -1654,7 +1655,7 @@ class FormularioMaestroDesing(tk.Tk):
         lbl_valor_inicio = CTkLabel(frame_formulario_inicio_operaciones, text="Ingrese Valor Inicial:",**ESTILO_ENTRYS_LABEL)
         lbl_valor_inicio.grid(column=0, row=4, padx=5, pady=5, sticky='e')
     
-        entry_valor_inicial = CTkEntry(frame_formulario_inicio_operaciones,placeholder_text="\uf53d",**ESTILO_ENTRYS_LABEL)
+        entry_valor_inicial = CTkEntry(frame_formulario_inicio_operaciones,placeholder_text="\ue528", width=60,height=60,font=("OCR A Extended", 20))
         entry_valor_inicial.grid(column=1, row=4, padx=5, pady=5, sticky='w')
     
         btn_confirmar = CTkButton(frame_formulario_inicio_operaciones,text="Confirmar Inicio",command=lambda :self.guardar_operacion(entry_id_inicio_operaciones, 
@@ -1687,7 +1688,7 @@ class FormularioMaestroDesing(tk.Tk):
 
             # Mostrar un mensaje de confirmación
             messagebox.showinfo("Operación Exitosa", "Los datos se han guardado correctamente.")
-
+            self.ventas()
         except Exception as e:
             # En caso de error, deshacer cualquier cambio en la base de datos
             conn.rollback()
@@ -1698,6 +1699,7 @@ class FormularioMaestroDesing(tk.Tk):
             # Cerrar la conexión a la base de datos
             if conn:
                 conn.close()
+            self.buttonHistorialVentas = tk.Button(self.menu_lateral,command=self.historial_ventas_calendario) 
 
     def formulario_cierre_caja(self):
         ESTILO_CTKBOTONES = {
@@ -1716,11 +1718,15 @@ class FormularioMaestroDesing(tk.Tk):
             'font': ("OCR A Extended", 16, "bold")
         }
 
+          # Calcular las coordenadas x e y para la posición deseada
+        x = 300  # Por ejemplo, coordenada x deseada
+        y = 50  # Por ejemplo, coordenada y deseada
+
         # Crear una nueva ventana
         self.cierre_caja = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         self.cierre_caja.title("Cierre de caja")
         self.cierre_caja.iconbitmap("./imagenes/logo.ico")
-        #self.cierre_caja.geometry("500x600")
+        self.cierre_caja.geometry(f"+{x}+{y}")  # Establecer solo posición
         self.cierre_caja.resizable(False, False)
 
         # Crear el formulario dentro de la ventana
@@ -1812,7 +1818,7 @@ class FormularioMaestroDesing(tk.Tk):
         lbl_valor_cierre = CTkLabel(frame_formulario_cierre_caja, text="Ingrese Valor de cierre:", **ESTILO_ENTRYS_LABEL)
         lbl_valor_cierre.grid(column=0, row=11, padx=5, pady=5, sticky='e')
 
-        entry_valor_cierre = CTkEntry(frame_formulario_cierre_caja, placeholder_text="\uf53d", **ESTILO_ENTRYS_LABEL)
+        entry_valor_cierre = CTkEntry(frame_formulario_cierre_caja, placeholder_text="\ue528", width=60,height=60,font=("OCR A Extended", 20))
         entry_valor_cierre.grid(column=1, row=11, padx=5, pady=5, sticky='w')
         
         entry_valor_cierre.bind("<Return>", lambda event: self.calculo_cierre(entry_valor_presente, entry_valor_cierre, informacion_final))
@@ -1872,6 +1878,7 @@ class FormularioMaestroDesing(tk.Tk):
                 conn.commit()
                 conn.close()
                 messagebox.showinfo("Éxito", "Cierre de caja confirmado y actualizado.")
+                self.ventas()
         else:
             messagebox.showinfo("Aviso", "No existe una jornada iniciada para el día de hoy.")
 
@@ -1988,12 +1995,16 @@ class FormularioMaestroDesing(tk.Tk):
         ESTILO_TITULO = {
             'font': ("OCR A Extended", 16, "bold")
         }
-
+        
+        x = 300  # Por ejemplo, coordenada x deseada
+        y = 50  # Por ejemplo, coordenada y deseada
+        
         # Crear una nueva ventana
         self.movimientos_caja = tk.Toplevel(self.cuerpo_principal, background=COLOR_CUERPO_PRINCIPAL)
         self.movimientos_caja.title("Movimientos en la caja")
         self.movimientos_caja.iconbitmap("./imagenes/logo.ico")
         self.movimientos_caja.resizable(False, False)
+        self.movimientos_caja.geometry(f"+{x}+{y}")
 
         # Crear el formulario dentro de la ventana
         frame_formulario_movimientos = tk.Frame(self.movimientos_caja, background=COLOR_CUERPO_PRINCIPAL)
@@ -2030,10 +2041,10 @@ class FormularioMaestroDesing(tk.Tk):
         entry_tipo = CTkOptionMenu(frame_formulario_movimientos,values=["Salida de dinero", "Entrada de dinero"],**ESTILO_ENTRYS_LABEL)
         entry_tipo.grid(column=0, row=6, padx=5, pady=5, sticky='e')
 
-        entry_monto = CTkEntry(frame_formulario_movimientos, placeholder_text="\uf53d", **ESTILO_ENTRYS_LABEL)
+        entry_monto = CTkEntry(frame_formulario_movimientos, placeholder_text="\ue528", width=60,height=60,font=("OCR A Extended", 20))
         entry_monto.grid(column=1, row=6, padx=5, pady=5, sticky='w')
 
-        entry_detalles = CTkEntry(frame_formulario_movimientos, placeholder_text="Detalle el destino del dinero", **ESTILO_ENTRYS_LABEL)
+        entry_detalles = CTkEntry(frame_formulario_movimientos, placeholder_text="Detalle el destino del dinero", **ESTILO_ENTRYS_LABEL,width=350)
         entry_detalles.grid(column=0,row=7,padx=5, pady=5, sticky='w')
 
         btn_confirmar = CTkButton(frame_formulario_movimientos, text="Confirmar\nmovimiento", **ESTILO_CTKBOTONES,
@@ -2112,7 +2123,7 @@ class FormularioMaestroDesing(tk.Tk):
             conn.commit()
 
             messagebox.showinfo("Operación exitosa", "El movimiento se ha guardado correctamente.")
-
+            self.ventas()
         except sqlite3.Error as e:
             if conn:
                 conn.rollback()
@@ -2188,14 +2199,6 @@ class FormularioMaestroDesing(tk.Tk):
         finally:
             if conn:
                 conn.close()
-
-    
-
-                           
-
-
-
-
 
 
 #------------------FUNCIONES PARA EL HISTORIAL DE VENTAS ----------------------------------------------------
@@ -2634,8 +2637,6 @@ class ParpadeoEtiqueta(tk.Label):
    
 
 """
-
-
 
 
 # Conectar a la base de datos (o crearla si no existe)
